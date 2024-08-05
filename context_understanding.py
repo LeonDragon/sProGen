@@ -1,6 +1,6 @@
 
 #%%
-# Gateways Identification
+# STEP 2 - CONTEXT UNDERSTANDING
 import json
 from llm_completion import get_completion
 
@@ -17,6 +17,7 @@ Instructions:
 - Context: Describe the context of the process model in the given textual description, e.g., logistics, manufacturing, service, finance, etc.
 - Clarify Scope: Determine the boundaries of the process (start and end points).
 - Set Objectives: Understand the purpose of the process and its desired outcomes.
+- Identify Participants and Roles: Identify different Participants and Roles involved in the process. These are typically represented as pools or lanes in BPMN. Textual Clues: Look for specific roles or departments mentioned, such as "cabinet officer", "principal registrar", "customer service", or "logistics team".
 
 Examples:
 
@@ -26,9 +27,14 @@ The employee onboarding process begins when a new hire submits their completed p
 Output:
 [
     {
+        "ModelName": "Onboarding process",
         "Context": "Human Resources",
         "Scope": "Starts with the submission of completed paperwork by the new hire and ends with the assignment of the new hire to their department.",
-        "Objectives": "To ensure new hires complete all necessary paperwork, attend orientation, and are successfully integrated into their departments."
+        "Objectives": "To ensure new hires complete all necessary paperwork, attend orientation, and are successfully integrated into their departments.",
+        "Participants": [
+            {"HR_Department": "Responsible for reviewing documents, scheduling orientation, and assigning new hire to the department"},
+            {"New_Hire": "Responsible for submitting paperwork and attending orientation"}
+        ]
     }
 ]
 
@@ -38,9 +44,16 @@ The product development process begins with the identification of market needs. 
 Output:
 [
     {
+        "ModelName": "Product development process",
         "Context": "Manufacturing",
         "Scope": "Starts with the identification of market needs and ends with the launch of the product into the market.",
-        "Objectives": "To develop a new product that meets market needs, from concept to market launch."
+        "Objectives": "To develop a new product that meets market needs, from concept to market launch.",
+        "Participants": [
+            {"Market_Analysts": "Responsible for identifying market needs"},
+            {"Designers": "Responsible for creating the product concept and designing the product"},
+            {"Developers": "Responsible for developing the product prototype"},
+            {"Testers": "Responsible for testing the prototype"}
+        ]
     }
 ]
 """
@@ -74,15 +87,13 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
-def identify_gateways(text):
+def identify_from_message(text):
     """
-    Identifies gateways in a business process description.
-
+    Identifies context in a business process description.
     Parameters:
         text (str): The textual description of the business process.
-
     Returns:
-        dict: A dictionary containing identified gateways and related metadata.
+        dict: A dictionary containing identified context and related metadata.
     """
     system_message = SYSTEM_MESSAGE_TEMPLATE
     user_message = construct_user_message(text)
@@ -102,7 +113,7 @@ if __name__ == "__main__":
     Relevant Process Description information:
     Once a loan application is received by the loan provider, and before proceeding with its assessment, the application itself needs to be checked for completeness. If the application is incomplete, it is returned to the applicant, so that they can fill out the missing information and send it back to the loan provider. This process is repeated until the application is found complete.
     """
-    result = identify_gateways(text_description)
+    result = identify_from_message(text_description)
     print(result)
 
 # %%

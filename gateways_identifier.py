@@ -1,13 +1,13 @@
 
 #%%
-# Gateways Identification
+# STEP 4 - GATEWAYS IDENTIFICATION
 import json
 from llm_completion import get_completion
 
 # Constants for system and user messages
 delimiter = "####"
 SYSTEM_MESSAGE_TEMPLATE = """
-Task: You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
+You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
 
 To accurately identify gateways for decision points and parallelism in BPMN, you need to understand the following concepts:
     1) XOR Split (Exclusive Gateway)
@@ -72,11 +72,13 @@ To accurately identify gateways for decision points and parallelism in BPMN, you
                 Path 1: Task: Technical approval
                 Path 2: Task: Financial approval
 
-Instruction: Given the process description and the list of Activities/Events (also called "Nodes") identified from this description within the delimiters {delimiter}, please Identify as many gateways as you can by performing the following steps:
+TASK: Given the process description and the list of Activities/Events (also called "Nodes") identified from this description within the delimiters {delimiter}, please Identify as many gateways as you can by performing the following steps:
 
-Steps to Perform
-    - Step 1: List all identified gateways along with textual clues that led to the decision. Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway. Do not print out this step.
-    - Step 2: Output a Python list of JSON objects, detailing the gateways identified in Step 1. Ensure the output is strictly in JSON format without any additional text. Do not print out Step 1.
+Instructions:
+- Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details. Try to identify gateways.
+- Using the list of provided "ActivitiesEvent", identify gateways.
+- List all identified gateways along with textual clues that led to the decision. Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway. Do not print out this step.
+- Output a Python list of JSON objects, detailing the gateways identified in Step 1. Ensure the output is strictly in JSON format without any additional text. Do not print out Step 1.
 
 JSON Object Structure
 - total_gateways: Total number of gateways identified. total_gateways = total_XOR_split + total_XOR_join + total_AND_split + total_AND_join + total_OR_split + total_OR_join
@@ -94,6 +96,67 @@ JSON Object Structure
     -- from_node: Node(s) preceding the gateway.
     -- to_nodes: Node(s) following the gateway.
     -- reason: This is a description explaining (clues) why you can make that inference.
+
+Examples:
+
+Input:
+The employee onboarding process begins when a new hire submits their completed paperwork. First, the HR department reviews the submitted documents. If any documents are missing or incorrect, they are returned to the new hire for correction. This process repeats until all documents are complete and correct. Once the documents are in order, the new hire is scheduled for orientation. After attending the orientation, the new hire is assigned to their department, completing the onboarding process.
+
+[
+    {
+        "ModelName": "Onboarding process",
+        "Context": "Human Resources",
+        "Scope": "Starts with the submission of completed paperwork by the new hire and ends with the assignment of the new hire to their department.",
+        "Objectives": "To ensure new hires complete all necessary paperwork, attend orientation, and are successfully integrated into their departments.",
+        "Participants": [
+            {"HR_Department": "Responsible for reviewing documents, scheduling orientation, and assigning new hire to the department"},
+            {"New_Hire": "Responsible for submitting paperwork and attending orientation"}
+        ],
+        "StartEvent": "Start_SubmitPaperwork",
+        "EndEvent": "End_AssignDepartment",
+        "ActivitiesEvent": [
+            {"A_ReviewDocuments": "The HR department reviews the submitted documents"},
+            {"A_ReturnForCorrection": "If any documents are missing or incorrect, they are returned to the new hire for correction"},
+            {"A_ScheduleOrientation": "Once the documents are in order, the new hire is scheduled for orientation"},
+            {"E_AttendOrientation": "After attending the orientation"},
+            {"A_AssignToDepartment": "the new hire is assigned to their department"}
+        ]
+    }
+]
+
+Output:
+[
+    {
+        "total_gateways": 2,
+        "total_XOR_split": 1,
+        "total_XOR_join": 1,
+        "total_AND_split": 0,
+        "total_AND_join": 0,
+        "total_OR_split": 0,
+        "total_OR_join": 0,
+        "Gateways": [
+            {
+                "id": "G1",
+                "name": "XOR_ReviewDocuments",
+                "type": "XOR",
+                "classification": "split",
+                "from_node": ["A_ReviewDocuments"],
+                "to_nodes": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
+                "reason": "If any documents are missing or incorrect, they are returned to the new hire for correction. Otherwise, the new hire is scheduled for orientation."
+            },
+            {
+                "id": "G2",
+                "name": "XOR_OnboardingComplete",
+                "type": "XOR",
+                "classification": "join",
+                "from_node": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
+                "to_nodes": ["A_AssignToDepartment"],
+                "reason": "After attending the orientation, the new hire is assigned to their department."
+            }
+        ]
+    }
+]
+
 """
 # Final Notes
 # - Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case, as some processes may diverge without needing an explicit convergence.
@@ -127,13 +190,11 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
-def identify_gateways(text):
+def identify_from_message(text):
     """
     Identifies gateways in a business process description.
-
     Parameters:
         text (str): The textual description of the business process.
-
     Returns:
         dict: A dictionary containing identified gateways and related metadata.
     """
@@ -152,59 +213,31 @@ def identify_gateways(text):
 # Example usage
 if __name__ == "__main__":
     text_description = """
-    Relevant Process Description information:
-    Order-to-cash process starts whenever a purchase order has been received from a customer. The first activity that is carried out is confirming the order. Next, the shipment address is received so that the product can be shipped to the customer. Afterwards, the invoice is emitted and once the payment is received the order is archived, thus completing the process. Please note that a purchase order is only confirmed if the product is in stock, otherwise the process completes by rejecting the order. If the order is confirmed, the shipment address is received and the requested product is shipped while the invoice is emitted and the payment is received. Afterwards, the order is archived and the process completes.
+    Relevant Process Description information and JSON format of Context:
+    Once a loan application is received by the loan provider, and before proceeding with its assessment, the application itself needs to be checked for completeness. If the application is incomplete, it is returned to the applicant, so that they can fill out the missing information and send it back to the loan provider. This process is repeated until the application is found complete.
 
-    Relevant activities/event information:
-    {
-    "StartEvent": {
-        "Label": "Start_ReceiveOrder",
-        "Description": "The process begins when a purchase order is received from a customer."
-    },
-    "EndEvents": [
+    [
         {
-        "Label": "End_OrderArchived",
-        "Description": "The process completes with the order archived after payment is received."
-        },
-        {
-        "Label": "End_OrderRejected",
-        "Description": "The process completes with the order rejected if the product is not in stock."
-        }
-    ],
-    "MainActivitiesOrIntermediateEvents": [
-        {
-        "Label": "A_ConfirmOrder",
-        "Description": "Confirm the order."
-        },
-        {
-        "Label": "A_ReceiveShipmentAddress",
-        "Description": "Receive the shipment address."
-        },
-        {
-        "Label": "A_ShipProduct",
-        "Description": "Ship the product to the customer."
-        },
-        {
-        "Label": "A_EmitInvoice",
-        "Description": "Emit the invoice."
-        },
-        {
-        "Label": "A_ReceivePayment",
-        "Description": "Receive the payment."
-        },
-        {
-        "Label": "A_ArchiveOrder",
-        "Description": "Archive the order."
-        },
-        {
-        "Label": "A_RejectOrder",
-        "Description": "Reject the order if the product is not in stock."
+            "ModelName": "Loan Application Completeness Check",
+            "Context": "Finance",
+            "Scope": "Starts with the receipt of a loan application by the loan provider and ends with the application being found complete.",
+            "Objectives": "To ensure that loan applications are complete before proceeding with their assessment.",
+            "Participants": [
+                {"Loan_Provider": "Responsible for checking the completeness of the loan application and returning incomplete applications to the applicant"},
+                {"Applicant": "Responsible for filling out missing information and resubmitting the loan application"}
+            ],
+            "StartEvent": "Start_ReceiveLoanApplication",
+            "EndEvent": "End_ApplicationComplete",
+            "ActivitiesEvent": [
+                {"A_CheckApplicationCompleteness": "The application itself needs to be checked for completeness"},
+                {"A_ReturnIncompleteApplication": "If the application is incomplete, it is returned to the applicant"},
+                {"A_ResubmitApplication": "Applicant fills out the missing information and sends it back to the loan provider"}
+            ]
         }
     ]
-    }
 
     """
-    result = identify_gateways(text_description)
+    result = identify_from_message(text_description)
     print(result)
 
 # %%

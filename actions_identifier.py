@@ -1,6 +1,6 @@
 
 #%%
-# Gateways Identification
+# STEP 3 - ACTIONS (EVENTS/ACTIVITIES) IDENTIFICATION
 import json
 from llm_completion import get_completion
 
@@ -10,15 +10,17 @@ SYSTEM_MESSAGE_TEMPLATE = """
 You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
 
 Task:
-Understand the textual description, identify context, and overall process goal of textual descriptions of BPMN process models within the delimiters {delimiter}. Output a Python list of JSON objects with keys: Context, Scope, Objectives. Ensure the output is strictly in JSON format without any additional text.
+Analyze the following textual description of a business process within the delimiters {delimiter} and identify distinct activities. Ensure that each activity is unique and avoid listing any duplicate activities or events that may occur due to loops within the process. Provide a clear and concise list of these activities, explicitly handling any repetitive actions due to loops without duplicating them.. Output a Python list of JSON objects with keys: StartEvent, EndEvent, Activities. Ensure the output is strictly in JSON format without any additional text.
 
 Instructions:
 - Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details.
 - Identify Start Event: Define the starting point of the process that initiates the workflow. Provide a brief label or description to clarify what triggers the process (e.g., Start_ReceiveOrder).
-   - Textual Clues: Phrases indicating the initiation of the process, such as "The process begins when...", "Start by...", "Initially...", "Upon receiving...", or "As soon as...".
+    - Textual Clues: Phrases indicating the initiation of the process, such as "The process begins when...", "Start by...", "Initially...", "Upon receiving...", or "As soon as...".
 - Identify End Event: Define the endpoint of the process, describing the completion of the process flow. Provide a brief label or description to clarify the end condition (e.g., "End_OrderFulfilled", "End_InvoiceSent", End_ShipmentComplete).
-   - Textual Clues: Phrases indicating the conclusion of the process, such as "The process ends when...", "Completion of...", "Finally...", "Once finished...", or "At the end...".
-- Identify Activities/Events: Identify specific actions or tasks described in the text and event usually in verb forms, assigning a variable to each (e.g., A_RecieveOrder, A_CheckCredit, E_RecieveEmail) (note that A for activities or tasks, E for Events). 
+    - Textual Clues: Phrases indicating the conclusion of the process, such as "The process ends when...", "Completion of...", "Finally...", "Once finished...", or "At the end...".
+- Ensure Uniqueness: Ensure that each activity is unique and avoid listing any duplicate activities or events that may occur due to loops within the process. If you find similar activities or events, remove the duplicates and retain only the first instance.
+    - Textual Clues for Removing Duplicates: Look for phrases indicating repetition or loops such as "re-...", "re-submit", "if not approved, return to...", "... again"or "repeat until...".
+- Identify Activities/Events: Identify specific actions or tasks described in the text and event usually in verb forms, assigning a variable to each (e.g., A_RecieveOrder, A_CheckCredit, E_RecieveEmail) (note that A for activities or tasks, E for Events). List of distinct activities without any redundancy.
     - Textual Clues:These are the core actions that drive the process forward. Look for verbs or action phrases like "register", "investigate", "prepare", "review", "approve", "admit", "examine", "process", "schedule", or "conduct".
 
 
@@ -31,16 +33,21 @@ The employee onboarding process begins when a new hire submits their completed p
     {
         "Context": "Human Resources",
         "Scope": "Starts with the submission of completed paperwork by the new hire and ends with the assignment of the new hire to their department.",
-        "Objectives": "To ensure new hires complete all necessary paperwork, attend orientation, and are successfully integrated into their departments."
+        "Objectives": "To ensure new hires complete all necessary paperwork, attend orientation, and are successfully integrated into their departments.",
+        "Participants": [
+            {"HR_Department": "Responsible for reviewing documents, scheduling orientation, and assigning new hire to the department"},
+            {"New_Hire": "Responsible for submitting paperwork and attending orientation"}
+        ]
     }
 ]
 
 Output:
 [
     {
+        "ModelName": "Onboarding process",
         "StartEvent": "Start_SubmitPaperwork",
         "EndEvent": "End_AssignDepartment",
-        "Activities": [
+        "ActivitiesEvent": [
             {"A_ReviewDocuments": "The HR department reviews the submitted documents"},
             {"A_ReturnForCorrection": "If any documents are missing or incorrect, they are returned to the new hire for correction"},
             {"A_ScheduleOrientation": "Once the documents are in order, the new hire is scheduled for orientation"},
@@ -55,9 +62,16 @@ The product development process begins with the identification of market needs. 
 
 [
     {
+        "ModelName": "Product development process",
         "Context": "Manufacturing",
         "Scope": "Starts with the identification of market needs and ends with the launch of the product into the market.",
-        "Objectives": "To develop a new product that meets market needs, from concept to market launch."
+        "Objectives": "To develop a new product that meets market needs, from concept to market launch.",
+        "Participants": [
+            {"Market_Analysts": "Responsible for identifying market needs"},
+            {"Designers": "Responsible for creating the product concept and designing the product"},
+            {"Developers": "Responsible for developing the product prototype"},
+            {"Testers": "Responsible for testing the prototype"}
+        ]
     }
 ]
 
@@ -66,7 +80,7 @@ Output:
     {
         "StartEvent": "Start_IdentifyMarketNeeds",
         "EndEvent": "End_LaunchProduct",
-        "Activities": [
+        "ActivitiesEvent": [
             {"A_CreateConcept": "Once the needs are identified, a product concept is created"},
             {"A_DesignProduct": "The next step is to design the product"},
             {"A_DevelopPrototype": "followed by developing a prototype"},
@@ -107,15 +121,13 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
-def identify_gateways(text):
+def identify_from_message(text):
     """
-    Identifies gateways in a business process description.
-
+    Identifies activities or events in a business process description.
     Parameters:
         text (str): The textual description of the business process.
-
     Returns:
-        dict: A dictionary containing identified gateways and related metadata.
+        dict: A dictionary containing identified  activities or events.
     """
     system_message = SYSTEM_MESSAGE_TEMPLATE
     user_message = construct_user_message(text)
@@ -137,13 +149,18 @@ if __name__ == "__main__":
 
     [
         {
+            "ModelName": "Loan Application Completeness Check",
             "Context": "Finance",
             "Scope": "Starts with the receipt of a loan application by the loan provider and ends with the application being found complete.",
-            "Objectives": "To ensure that loan applications are complete before proceeding with their assessment."
+            "Objectives": "To ensure that loan applications are complete before proceeding with their assessment.",
+            "Participants": [
+                {"Loan_Provider": "Responsible for checking the completeness of the loan application and returning incomplete applications to the applicant"},
+                {"Applicant": "Responsible for filling out missing information and resubmitting the loan application"}
+            ]
         }
     ]
     """
-    result = identify_gateways(text_description)
+    result = identify_from_message(text_description)
     print(result)
 
 # %%
