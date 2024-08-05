@@ -1,2 +1,2 @@
 openai
-langchain_ollama.llms
+langchain_ollama
