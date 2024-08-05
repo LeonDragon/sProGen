@@ -1,4 +1,4 @@
-# Your Project Name
+# sProGen - Automatic Sound Process Model Generation from Textual Description
 
 ## Setup Instructions
 
