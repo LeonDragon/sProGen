@@ -72,7 +72,7 @@ To accurately identify gateways for decision points and parallelism in BPMN, you
                 Path 1: Task: Technical approval
                 Path 2: Task: Financial approval
 
-Instruction: Given the process description and the list of Activities/Events (also called "Nodes")identified from this description within the delimiters {delimiter}, please perform the following steps:
+Instruction: Given the process description and the list of Activities/Events (also called "Nodes") identified from this description within the delimiters {delimiter}, please Identify as many gateways as you can by performing the following steps:
 
 Steps to Perform
     - Step 1: List all identified gateways along with textual clues that led to the decision. Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway. Do not print out this step.
@@ -98,9 +98,6 @@ JSON Object Structure
 # Final Notes
 # - Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case, as some processes may diverge without needing an explicit convergence.
 # - Ensure the output is strictly in JSON format without any additional text.
-
-
-
 
 def construct_user_message(text):
     """
@@ -145,7 +142,7 @@ def identify_gateways(text):
     messages = construct_messages(system_message, user_message)
 
     #response = get_completion(messages, api="ollama", model="llama3.1", max_tokens=1000, temperature=0.0)
-    response = get_completion(messages, api="openai", model="gpt-4o-mini")
+    response = get_completion(messages, api="openai", model="gpt-4o", temperature=0.0)
     return response
     # try:
     #     return json.loads(response)
@@ -154,8 +151,11 @@ def identify_gateways(text):
 
 # Example usage
 if __name__ == "__main__":
-    text_description = """Order-to-cash process starts whenever a purchase order has been received from a customer. The first activity that is carried out is confirming the order. Next, the shipment address is received so that the product can be shipped to the customer. Afterwards, the invoice is emitted and once the payment is received the order is archived, thus completing the process. Please note that a purchase order is only confirmed if the product is in stock, otherwise the process completes by rejecting the order. If the order is confirmed, the shipment address is received and the requested product is shipped while the invoice is emitted and the payment is received. Afterwards, the order is archived and the process completes.
+    text_description = """
+    Relevant Process Description information:
+    Order-to-cash process starts whenever a purchase order has been received from a customer. The first activity that is carried out is confirming the order. Next, the shipment address is received so that the product can be shipped to the customer. Afterwards, the invoice is emitted and once the payment is received the order is archived, thus completing the process. Please note that a purchase order is only confirmed if the product is in stock, otherwise the process completes by rejecting the order. If the order is confirmed, the shipment address is received and the requested product is shipped while the invoice is emitted and the payment is received. Afterwards, the order is archived and the process completes.
 
+    Relevant activities/event information:
     {
     "StartEvent": {
         "Label": "Start_ReceiveOrder",
