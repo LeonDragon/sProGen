@@ -1,5 +1,6 @@
 
 #%%
+# Gateways Identification
 import json
 from llm_completion import get_completion
 
@@ -9,54 +10,73 @@ SYSTEM_MESSAGE_TEMPLATE = """
 Task: You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
 
 To accurately identify gateways for decision points and parallelism in BPMN, you need to understand the following concepts:
-- There are three types of gateways: Exclusive (XOR), Inclusive (OR), and Parallel (AND). Each gateway type can function as either a split or a join.
-- Exclusive Gateways (XOR):
-    - Definition: Exclusive Gateways are used to model decision points where only one of the available paths can be taken. This is akin to a simple "either/or" decision.
-    - Textual Clues: Look for words and phrases like "if", "only if", "either", "exclusive", "else", "depending on", "in case of", "should", "must", "when", etc.
-    - XOR can be split (divergence) or join (convergence):
-        - Split Behavior (Choosing Multiple Paths): When you reach this gateway, it checks all the conditions for each path. All paths with true conditions are taken simultaneously. Example: Imagine you are ordering food, and you can choose to get a drink, a side dish, or both. Depending on what you choose, you might get one, both, or none.
-        - Join Behavior (Synchronizing Paths): When paths come together at this gateway, it waits for all active paths to arrive before moving forward. It ensures all conditions are met before proceeding. Example: In the process where a customer places an order that can either be approved or rejected, the process proceeds to notify the customer after either outcome, making it an XOR join as it does not require synchronization.
-    - Modeling Instructions: Provide a question that describes the decision point. Example: XOR_CreditOK? If the condition is met, the flow follows one path; otherwise, it follows a different path.
-    - Example:
-        - Text: "If the credit is approved, process the payment. Else, send a rejection notice."
-        - Model: 
-            - Gateway: XOR_CreditApproved?
-            - Path 1: Yes → Task: Process payment
-            - Path 2: No → Task: Send rejection notice
+    1) XOR Split (Exclusive Gateway)
+        - Definition: Used to model decision points where only one of the available paths can be taken (either/or decision).
+        - Textual Clues: "if", "only if", "either", "exclusive", "else", "depending on", "in case of", "should", "must", "when".
+        - Behavior: Checks all conditions for each path. Only one path is taken based on the condition.
+        - Example:
+            Text: "If the credit is approved, process the payment. Else, send a rejection notice."
+            Model:
+                Gateway: XOR_CreditApproved?
+                Path 1: Yes → Task: Process payment
+                Path 2: No → Task: Send rejection notice
+    2) XOR Join (Exclusive Gateway)
+        - Definition: Waits for one active path to arrive before moving forward. No synchronization required.
+        - Contextual Clues: Actions taken after multiple alternative paths, concluding decisions where one of several conditions is met.
+        - Behavior: Sometimes inferred from context if explicit clues are not present.
+        - Example:
+            Text: "Notify the customer after the order is either approved or rejected."
+            Model:
+                Gateway: XOR_OrderOutcome?
+                Path 1: Approved → Task: Notify customer
+                Path 2: Rejected → Task: Notify customer
+    3) OR Split (Inclusive Gateway)
+        - Definition: Allows multiple paths to be taken simultaneously (one or more paths can be chosen based on conditions).
+        - Textual Clues: "optionally", "can", "might", "inclusive", "and/or", "one or more", "any of", "possibly", "choose", "elect".
+        - Behavior: Checks conditions for each path. Multiple paths with true conditions are taken simultaneously.
+        - Example:
+            Text: "A customer can choose to receive email notifications, SMS notifications, or both."
+            Model:
+                Gateway: OR_NotificationPreferences?
+                Path 1: Email → Task: Send email notification
+                Path 2: SMS → Task: Send SMS notification
+    4) OR Join (Inclusive Gateway)
+        - Definition: Waits for all active paths to arrive before moving forward. Synchronizes all active paths.
+        - Contextual Clues: Need to wait for multiple tasks or conditions to be completed before proceeding.
+        - Behavior: Sometimes inferred from context if explicit clues are not present.
+        - Example:
+            Text: "After completing email, social media, and direct mail campaigns, analyze the results."
+            Model:
+                Gateway: OR_AnalyzeResults?
+                Path 1: Email → Task: Analyze email results
+                Path 2: Social Media → Task: Analyze social media results
+                Path 3: Direct Mail → Task: Analyze direct mail results
+    5) AND Split (Parallel Gateway)
+        - Definition: Models situations where multiple tasks occur concurrently (all paths are taken simultaneously without conditions).
+        - Textual Clues: "and", "both", "concurrently", "simultaneously", "parallel", "at the same time", "in tandem", "jointly", "while".
+        - Behavior: Starts all paths at the same time, allowing tasks to be done concurrently.
+        - Example:
+            Text: "The system will package and label the order at the same time."
+            Model:
+                Gateway: AND_PackageAndLabel
+                Path 1: Task: Package order
+                Path 2: Task: Label order
+    6) AND Join (Parallel Gateway)
+        - Definition: Waits for all paths to be completed before moving forward. Ensures all tasks are done before proceeding.
+        - Contextual Clues: Multiple parallel tasks or conditions need to be completed before a subsequent action can be taken.
+        - Behavior: Sometimes inferred from context if explicit clues are not present.
+        - Example:
+            Text: "Proceed after receiving approvals from both the technical and financial departments."
+            Model:
+                Gateway: AND_Approvals
+                Path 1: Task: Technical approval
+                Path 2: Task: Financial approval
 
-- Inclusive Gateways (OR):
-    - Definition: Inclusive Gateways allow for multiple paths to be taken simultaneously. This means that one or more of the available paths can be chosen based on the conditions.
-    - Textual Clues: Look for words and phrases like "optionally", "can", "might", "inclusive", "and/or", "one or more", "any of", "possibly", "choose", "elect", etc.
-    - OR can be split (divergence) or join (convergence)::
-        - Split Behavior (Choosing Multiple Paths): When you reach this gateway, it checks all the conditions for each path. All paths with true conditions are taken simultaneously. Example: Imagine you are ordering food, and you can choose to get a drink, a side dish, or both. Depending on what you choose, you might get one, both, or none.
-        - Join Behavior (Synchronizing Paths):When paths come together at this gateway, it waits for all active paths to arrive before moving forward. It ensures all conditions are met before proceeding. Example: In a marketing campaign running through email, social media, and direct mail, the process moves to analyze results once any of these channels complete, requiring synchronization of all active channels, thus making it an OR join.
-    - Modeling Instructions: Provide a question that describes the decision point and clearly describe the conditions for each path. All applicable paths can be activated simultaneously.
-    - Example:
-        - Text: "A customer can choose to receive email notifications, SMS notifications, or both."
-        - Model: 
-            - Gateway: OR_NotificationPreferences?
-            - Path 1: Email → Task: Send email notification
-            - Path 2: SMS → Task: Send SMS notification
-
-- Parallel Gateways (AND):
-    - Definition: Parallel Gateways are used to model situations where multiple tasks occur concurrently. This means that all paths are taken simultaneously without any conditions.
-    - Textual Clues: Look for words and phrases like "and", "both", "concurrently", "simultaneously", "parallel", "at the same time", "in tandem", "jointly", "while", etc.
-    - AND can be split (divergence) or join (convergence)::
-        - Split Behavior (Starting Multiple Tasks):When you reach this gateway, all paths are started at the same time, allowing tasks to be done concurrently. Example: Imagine you need to bake a cake and also make a salad. You start both tasks at the same time and continue with the next step only when both are done.
-        - Join Behavior (Waiting for All Tasks): When paths come together at this gateway, it waits for all paths to be completed before moving forward. It ensures that all tasks are done before proceeding. Example: For a project needing approvals from both the technical and financial departments, the process proceeds only after both departments have approved, necessitating synchronization of both flows, identifying it as an AND join.
-    - Modeling Instructions: State explicitly that tasks are to be performed in parallel.
-    - Example:
-        - Text: "The system will package and label the order at the same time."
-        - Model: 
-            - Gateway: AND_PackageAndLabel
-            - Path 1: Task: Package order
-            - Path 2: Task: Label order
-
-Given the process description and the list of Activities/Events (also called "Nodes")identified from this description within the delimiters {delimiter}, please perform the following steps:
+Instruction: Given the process description and the list of Activities/Events (also called "Nodes")identified from this description within the delimiters {delimiter}, please perform the following steps:
 
 Steps to Perform
-Step 1: List all identified gateways along with textual clues that led to the decision.
-Step 2: Output a Python list of JSON objects, detailing the gateways identified in Step 1.
+    - Step 1: List all identified gateways along with textual clues that led to the decision. Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway. Do not print out this step.
+    - Step 2: Output a Python list of JSON objects, detailing the gateways identified in Step 1. Ensure the output is strictly in JSON format without any additional text. Do not print out Step 1.
 
 JSON Object Structure
 - total_gateways: Total number of gateways identified. total_gateways = total_XOR_split + total_XOR_join + total_AND_split + total_AND_join + total_OR_split + total_OR_join
@@ -73,61 +93,12 @@ JSON Object Structure
     -- classification: Indicates whether the gateway is a "split" or "join".
     -- from_node: Node(s) preceding the gateway.
     -- to_nodes: Node(s) following the gateway.
-
-Keys Explanation
-- id: Unique identifier for each gateway.
-- name: Placeholder name for each gateway.
-- type: Type of gateway (XOR, AND, OR), determined from textual clues.
-- classification: Indicates whether the gateway splits into multiple paths or joins multiple paths.
-- from_node/from_nodes: Element(s) immediately before the gateway.
-- to_node/to_nodes: Element(s) immediately after the gateway.
-
-Final Notes
-- Split gateways are typically accompanied by join gateways but not always.
-- Ensure output is strictly in the JSON format without any additional text.
+    -- reason: This is a description explaining (clues) why you can make that inference.
 """
+# Final Notes
+# - Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case, as some processes may diverge without needing an explicit convergence.
+# - Ensure the output is strictly in JSON format without any additional text.
 
-# {
-#     "total_number_gateways": "{{number_of_gateways}}",
-#     "total_number_XOR_split": "{{number_of_XOR_split}}",
-#     "total_number_XOR_join": "{{number_of_XOR_join}}",
-#     "total_number_AND_split": "{{number_of_AND_split}}",
-#     "total_number_AND_join": "{{number_of_AND_join}}",
-#     "total_number_OR_split": "{{number_of_OR_split}}",
-#     "total_number_OR_join": "{{number_of_OR_join}}",
-#     "gateways": [
-#         {
-#             "id": "{{gateway_id_1}}",
-#             "name": "{{gateway_name_1}}",
-#             "type": "{{gateway_type_1}}",
-#             "classification": "{{gateway_classification_1}}",
-#             "from_node": "{{from_node_1}}",
-#             "to_nodes": ["{{to_node_1a}}", "{{to_node_1b}}"]
-#         },
-#         {
-#             "id": "{{gateway_id_2}}",
-#             "name": "{{gateway_name_2}}",
-#             "type": "{{gateway_type_2}}",
-#             "classification": "{{gateway_classification_2}}",
-#             "from_node": "{{from_node_2}}",
-#             "to_nodes": ["{{to_node_2a}}"]
-#         },
-#         ...
-#     ]
-# }
-
-# Detail the keys' meaning:
-# id: A unique identifier for the gateway.
-# name: A placeholder name for the gateway.
-# type: The type of gateway (XOR, AND, OR). Identify based on the textual clues provided above.
-# classification: Indicates whether the gateway is a "split" or "join". Determine from the context where the gateway either splits into multiple paths or joins multiple paths.
-# from_node/from_nodes: The node(s) preceding the gateway. Identify the element immediately before the gateway.
-# to_node/to_nodes: The node(s) following the gateway. Identify the element(s) immediately after the gateway.
-
-# REMEMBER:
-# - Typically, a split gateway is accompanied by a join gateway, though this is not always the case. 
-# - Do not include any additional text outside of the JSON format. 
-# - Refrain from providing any explanatory text after the requested JSON output.
 
 
 
@@ -173,8 +144,8 @@ def identify_gateways(text):
     user_message = construct_user_message(text)
     messages = construct_messages(system_message, user_message)
 
-    #response = get_completion(messages, api="ollama", model="llama3.1")
-    response = get_completion(messages, api="openai", model="gpt-4o")
+    #response = get_completion(messages, api="ollama", model="llama3.1", max_tokens=1000, temperature=0.0)
+    response = get_completion(messages, api="openai", model="gpt-4o-mini")
     return response
     # try:
     #     return json.loads(response)

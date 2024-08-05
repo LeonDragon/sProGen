@@ -16,7 +16,7 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.7,
         ollama_llm = OllamaLLM(
             model=model,
             temperature=temperature,
-            num_ctx=2048,
+            num_ctx=4096,
             num_predict=max_tokens,
         )
         result = ollama_llm.invoke(messages)
