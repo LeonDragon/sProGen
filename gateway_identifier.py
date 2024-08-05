@@ -52,54 +52,84 @@ To accurately identify gateways for decision points and parallelism in BPMN, you
             - Path 1: Task: Package order
             - Path 2: Task: Label order
 
-Given the process description and the list of Activities/Events identified from this description within the delimiters {delimiter}, please perform the following steps:
+Given the process description and the list of Activities/Events (also called "Nodes")identified from this description within the delimiters {delimiter}, please perform the following steps:
 
-Step 1: List all identified gateways (either split or join) along with the clues that led to your decision.
+Steps to Perform
+Step 1: List all identified gateways along with textual clues that led to the decision.
+Step 2: Output a Python list of JSON objects, detailing the gateways identified in Step 1.
 
-Step 2: Using the gateways identified in Step 1, output a Python list of JSON objects, where each object follows this format::
-{
-    "total_number_gateways": "{{number_of_gateways}}",
-    "total_number_XOR_split": "{{number_of_XOR_split}}",
-    "total_number_XOR_join": "{{number_of_XOR_join}}",
-    "total_number_AND_split": "{{number_of_AND_split}}",
-    "total_number_AND_join": "{{number_of_AND_join}}",
-    "total_number_OR_split": "{{number_of_OR_split}}",
-    "total_number_OR_join": "{{number_of_OR_join}}",
-    "gateways": [
-        {
-            "id": "{{gateway_id_1}}",
-            "name": "{{gateway_name_1}}",
-            "type": "{{gateway_type_1}}",
-            "classification": "{{gateway_classification_1}}",
-            "from_node": "{{from_node_1}}",
-            "to_nodes": ["{{to_node_1a}}", "{{to_node_1b}}"]
-        },
-        {
-            "id": "{{gateway_id_2}}",
-            "name": "{{gateway_name_2}}",
-            "type": "{{gateway_type_2}}",
-            "classification": "{{gateway_classification_2}}",
-            "from_node": "{{from_node_2}}",
-            "to_nodes": ["{{to_node_2a}}"]
-        },
-        ...
-    ]
-}
+JSON Object Structure
+- total_gateways: Total number of gateways identified. total_gateways = total_XOR_split + total_XOR_join + total_AND_split + total_AND_join + total_OR_split + total_OR_join
+- total_XOR_split: Number of XOR split gateways.
+- total_XOR_join: Number of XOR join gateways.
+- total_AND_split: Number of AND split gateways.
+- total_AND_join: Number of AND join gateways.
+- total_OR_split: Number of OR split gateways.
+- total_OR_join: Number of OR join gateways.
+- gateways: A list of gateway objects, each containing:
+    -- id: Unique identifier for the gateway.
+    -- name: Placeholder name for the gateway.
+    -- type: Type of gateway (XOR, AND, OR).
+    -- classification: Indicates whether the gateway is a "split" or "join".
+    -- from_node: Node(s) preceding the gateway.
+    -- to_nodes: Node(s) following the gateway.
 
-Detail the keys' meaning:
-id: A unique identifier for the gateway.
-name: A placeholder name for the gateway.
-type: The type of gateway (XOR, AND, OR). Identify based on the textual clues provided above.
-classification: Indicates whether the gateway is a "split" or "join". Determine from the context where the gateway either splits into multiple paths or joins multiple paths.
-from_node/from_nodes: The node(s) preceding the gateway. Identify the element immediately before the gateway.
-to_node/to_nodes: The node(s) following the gateway. Identify the element(s) immediately after the gateway.
+Keys Explanation
+- id: Unique identifier for each gateway.
+- name: Placeholder name for each gateway.
+- type: Type of gateway (XOR, AND, OR), determined from textual clues.
+- classification: Indicates whether the gateway splits into multiple paths or joins multiple paths.
+- from_node/from_nodes: Element(s) immediately before the gateway.
+- to_node/to_nodes: Element(s) immediately after the gateway.
 
-Note:
-Typically, split gateways are accompanied by join gateways, though this is not always the case. 
-Do not include any additional text outside of the JSON format. 
-Refrain from providing any explanatory text after the requested JSON output.
-
+Final Notes
+- Split gateways are typically accompanied by join gateways but not always.
+- Ensure output is strictly in the JSON format without any additional text.
 """
+
+# {
+#     "total_number_gateways": "{{number_of_gateways}}",
+#     "total_number_XOR_split": "{{number_of_XOR_split}}",
+#     "total_number_XOR_join": "{{number_of_XOR_join}}",
+#     "total_number_AND_split": "{{number_of_AND_split}}",
+#     "total_number_AND_join": "{{number_of_AND_join}}",
+#     "total_number_OR_split": "{{number_of_OR_split}}",
+#     "total_number_OR_join": "{{number_of_OR_join}}",
+#     "gateways": [
+#         {
+#             "id": "{{gateway_id_1}}",
+#             "name": "{{gateway_name_1}}",
+#             "type": "{{gateway_type_1}}",
+#             "classification": "{{gateway_classification_1}}",
+#             "from_node": "{{from_node_1}}",
+#             "to_nodes": ["{{to_node_1a}}", "{{to_node_1b}}"]
+#         },
+#         {
+#             "id": "{{gateway_id_2}}",
+#             "name": "{{gateway_name_2}}",
+#             "type": "{{gateway_type_2}}",
+#             "classification": "{{gateway_classification_2}}",
+#             "from_node": "{{from_node_2}}",
+#             "to_nodes": ["{{to_node_2a}}"]
+#         },
+#         ...
+#     ]
+# }
+
+# Detail the keys' meaning:
+# id: A unique identifier for the gateway.
+# name: A placeholder name for the gateway.
+# type: The type of gateway (XOR, AND, OR). Identify based on the textual clues provided above.
+# classification: Indicates whether the gateway is a "split" or "join". Determine from the context where the gateway either splits into multiple paths or joins multiple paths.
+# from_node/from_nodes: The node(s) preceding the gateway. Identify the element immediately before the gateway.
+# to_node/to_nodes: The node(s) following the gateway. Identify the element(s) immediately after the gateway.
+
+# REMEMBER:
+# - Typically, a split gateway is accompanied by a join gateway, though this is not always the case. 
+# - Do not include any additional text outside of the JSON format. 
+# - Refrain from providing any explanatory text after the requested JSON output.
+
+
 
 def construct_user_message(text):
     """
@@ -143,8 +173,8 @@ def identify_gateways(text):
     user_message = construct_user_message(text)
     messages = construct_messages(system_message, user_message)
 
-    response = get_completion(messages, api="ollama", model="llama3.1")
-    #response = get_completion(messages, api="openai", model="gpt-4o")
+    #response = get_completion(messages, api="ollama", model="llama3.1")
+    response = get_completion(messages, api="openai", model="gpt-4o")
     return response
     # try:
     #     return json.loads(response)

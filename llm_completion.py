@@ -2,7 +2,7 @@ from openai import OpenAI
 from langchain_ollama.llms import OllamaLLM
 from config import OPENAI_API_KEY
 
-def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.0, max_tokens=500):
+def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.7, max_tokens=500):
     if api == "openai":
         client = OpenAI(api_key=OPENAI_API_KEY)
         response = client.chat.completions.create(
@@ -26,15 +26,15 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.0,
     return result
 
 
-# TEST THE API
-messages = [{"role": "user", "content": "What is the tallest mountain in the world?"}]
-# Call for OpenAI API
-openai_result = get_completion(messages, api="openai", model="gpt-4o-mini")
-print("OpenAI Result:", openai_result)
+# # TEST THE API
+# messages = [{"role": "user", "content": "What is the tallest mountain in the world?"}]
+# # Call for OpenAI API
+# openai_result = get_completion(messages, api="openai", model="gpt-4o-mini")
+# print("OpenAI Result:", openai_result)
 
-print("\n")
+# print("\n")
 
-# Call for Ollama API
-ollama_result = get_completion(messages, api="ollama", model="llama3.1")
-print("Ollama Result:", ollama_result)
-# %%
+# # Call for Ollama API
+# ollama_result = get_completion(messages, api="ollama", model="llama3.1")
+# print("Ollama Result:", ollama_result)
+# # %%

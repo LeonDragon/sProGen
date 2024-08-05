@@ -1,0 +1,68 @@
+bpmn_gateways = """
+### Exclusive Gateways (XOR)
+- **Definition**: Used to model decision points where only one of the available paths can be taken (either/or decision).
+- **Textual Clues**: Look for "if", "only if", "either", "exclusive", "else", "depending on", "in case of", "should", "must", "when", etc.
+
+#### XOR Split (Divergence)
+- **Behavior**: Checks all conditions for each path. Only one path is taken based on the condition.
+- **Example**:
+  - **Text**: "If the credit is approved, process the payment. Else, send a rejection notice."
+  - **Model**:
+    - Gateway: XOR_CreditApproved?
+    - Path 1: Yes → Task: Process payment
+    - Path 2: No → Task: Send rejection notice
+
+#### XOR Join (Convergence)
+- **Behavior**: Waits for one active path to arrive before moving forward. No synchronization required. Sometimes you need to infer this behavior from the context if explicit clues are not present.
+- **Example**:
+  - **Text**: "Notify the customer after the order is either approved or rejected."
+  - **Model**:
+    - Gateway: XOR_OrderOutcome?
+    - Path 1: Approved → Task: Notify customer
+    - Path 2: Rejected → Task: Notify customer
+
+### Inclusive Gateways (OR)
+- **Definition**: Allows multiple paths to be taken simultaneously based on conditions (one or more paths can be chosen).
+- **Textual Clues**: Look for "optionally", "can", "might", "inclusive", "and/or", "one or more", "any of", "possibly", "choose", "elect", etc.
+
+#### OR Split (Divergence)
+- **Behavior**: Checks conditions for each path. Multiple paths with true conditions are taken simultaneously.
+- **Example**:
+  - **Text**: "A customer can choose to receive email notifications, SMS notifications, or both."
+  - **Model**:
+    - Gateway: OR_NotificationPreferences?
+    - Path 1: Email → Task: Send email notification
+    - Path 2: SMS → Task: Send SMS notification
+
+#### OR Join (Convergence)
+- **Behavior**: Waits for all active paths to arrive before moving forward. Synchronizes all active paths. Sometimes you need to infer this behavior from the context if explicit clues are not present.
+- **Example**:
+  - **Text**: "After completing email, social media, and direct mail campaigns, analyze the results."
+  - **Model**:
+    - Gateway: OR_AnalyzeResults?
+    - Path 1: Email → Task: Analyze email results
+    - Path 2: Social Media → Task: Analyze social media results
+    - Path 3: Direct Mail → Task: Analyze direct mail results
+
+### Parallel Gateways (AND)
+- **Definition**: Models situations where multiple tasks occur concurrently (all paths are taken simultaneously without conditions).
+- **Textual Clues**: Look for "and", "both", "concurrently", "simultaneously", "parallel", "at the same time", "in tandem", "jointly", "while", etc.
+
+#### AND Split (Divergence)
+- **Behavior**: Starts all paths at the same time, allowing tasks to be done concurrently.
+- **Example**:
+  - **Text**: "The system will package and label the order at the same time."
+  - **Model**:
+    - Gateway: AND_PackageAndLabel
+    - Path 1: Task: Package order
+    - Path 2: Task: Label order
+
+#### AND Join (Convergence)
+- **Behavior**: Waits for all paths to be completed before moving forward. Ensures all tasks are done before proceeding. Sometimes you need to infer this behavior from the context if explicit clues are not present.
+- **Example**:
+  - **Text**: "Proceed after receiving approvals from both the technical and financial departments."
+  - **Model**:
+    - Gateway: AND_Approvals
+    - Path 1: Task: Technical approval
+    - Path 2: Task: Financial approval
+"""
