@@ -7,6 +7,9 @@ from actions_identifier import identify_from_message as actions_identify_from_me
 from gateways_identifier import identify_from_message as gateways_identify_from_message
 from loops_identifier import identify_from_message as loops_identify_from_message
 from sequenceFlows_identifier import identify_from_message as sequenceFlow_identify_from_message
+from bp_visualizer import identify_from_message as bpm_visualization_from_message
+from bp_visualizer import visualize_bpmn
+
 
 def combine_results(previous_result, current_result, input_text=""):
     """
@@ -97,6 +100,11 @@ def pipeline(process_description):
     previous_json_result = combine_results(previous_json_result, sequence_flow_result)
     combined_prompt = combine_results(previous_json_result, sequence_flow_result, new_process_description)
     print(combined_prompt)
+
+    # Step 7: Visualize Business Process with Graphviz
+    print("Step 7: ======================= \n")
+    bp_dot = bpm_visualization_from_message(sequence_flow_result, api="openai", model="gpt-4o", temperature=0.0)
+    visualize_bpmn(bp_dot)
     
     return previous_json_result
 

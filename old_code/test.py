@@ -1,74 +1,64 @@
-#%%
-import json
+import graphviz
 
-def combine_results(previous_result, current_result, input_text, step_name):
+# import os
+# os.environ["PATH"] += os.pathsep + 'D:\ProgramFiles\Graphviz-12.0.0-win64'
+
+def visualize_bpmn(dot_string):
     """
-    Combines the results from two steps, including the input text and JSON format for each step.
+    Visualizes a BPMN model using Graphviz.
 
     Parameters:
-        previous_result (str): JSON string from the previous step.
-        current_result (str): JSON string from the current step.
-        input_text (str): The input text used for the current step.
-        step_name (str): The name of the current step.
-
-    Returns:
-        str: Combined string containing input text and combined JSON data.
+        dot_string (str): The DOT language representation of the BPMN model.
     """
-    previous_json_data = json.loads(previous_result)
-    current_json_data = json.loads(current_result)
+    try:
+        graph = graphviz.Source(dot_string)  # Create Graphviz Source object
+        graph.render('bpmn_model', format='jpg', view=True)  # Render and view the graph
+        print("Graphviz visualization generated successfully.")
+    except Exception as e:
+        print("Error in generating visualization:", e)  # Print error message if any
 
-    # Combine both JSON results
-    if isinstance(previous_json_data, list):
-        previous_json_data = previous_json_data[0]
-    if isinstance(current_json_data, list):
-        current_json_data = current_json_data[0]
-    
-    # Combine both JSON results
-    combined_json_data = previous_json_data
-    combined_json_data.update(current_json_data)
-    
-    # Create the final combined result string
-    final_result = input_text + "\n" + json.dumps(combined_json_data, indent=4)
-    
-    return final_result
+# Example DOT string for a simple BPMN model
+dot_string = """
+digraph BPMN {
+    rankdir=LR;
+    node [shape=circle, style=filled, color=lightblue];
 
-# Example usage
-if __name__ == "__main__":
-    text_description = """
-    Relevant Process Description information:
-    Once a loan application is received by the loan provider, and before proceeding with its assessment, the application itself needs to be checked for completeness. If the application is incomplete, it is returned to the applicant, so that they can fill out the missing information and send it back to the loan provider. This process is repeated until the application is found complete.
-    """
+    // Start and End nodes
+    start [label="Start", color=green];
+    end [label="End", color=red, penwidth=3];
 
-    json_data1 = [
-        {
-            "SequenceFlows": [
-                {"from": "Start_ReceiveLoanApplication", "to": "A_CheckApplicationCompleteness"},
-                {"from": "A_CheckApplicationCompleteness", "to": "XOR_CheckCompleteness"},
-                {"from": "XOR_CheckCompleteness", "to": "A_ReturnIncompleteApplication", "condition": "if application is incomplete"},
-                {"from": "XOR_CheckCompleteness", "to": "End_ApplicationComplete", "condition": "if application is complete"},
-                {"from": "A_ReturnIncompleteApplication", "to": "A_ResubmitApplication"},
-                {"from": "A_ResubmitApplication", "to": "XOR_ResubmitOrComplete"},
-                {"from": "XOR_ResubmitOrComplete", "to": "A_CheckApplicationCompleteness"}
-            ]
-        }
-    ]
+    // Activities
+    node [shape=box, style=rounded, color=lightgreen];
+    activity1 [label="Activity 1"];
+    activity2 [label="Activity 2"];
+    activity3 [label="Activity 3"];
 
-    json_data2 = {
-        "StartEvent": "Start_ReceiveLoanApplication",
-        "EndEvent": "End_ApplicationComplete",
-        "ActivitiesEvent": [
-            {"A_CheckApplicationCompleteness": "The application itself needs to be checked for completeness"},
-            {"A_ReturnIncompleteApplication": "If the application is incomplete, it is returned to the applicant"},
-            {"A_ResubmitApplication": "Applicant fills out the missing information and sends it back to the loan provider"}
-        ]
-    }
+    // Gateways
+    node [shape=diamond, style=filled, color="#FFD700"];
+    xor_gateway [label="XOR Gateway"];
+    and_gateway [label="AND Gateway"];
 
-    # Convert JSON data to strings
-    previous_result = json.dumps(json_data1, indent=4)
-    current_result = json.dumps(json_data2, indent=4)
-    
-    # Combine results
-    combined_result = combine_results(previous_result, current_result, text_description, "Step1")
-    print(combined_result)
+    // Edges
+    start -> activity1;
+    activity1 -> xor_gateway;
+    xor_gateway -> activity2 [label="Condition A"];
+    xor_gateway -> activity3 [label="Condition B"];
+    activity2 -> and_gateway;
+    activity3 -> and_gateway;
+    and_gateway -> end;
 
-# %%
+    // Labels positioned below the nodes
+    start_label [shape=plaintext, label="Start", color=white];
+    end_label [shape=plaintext, label="End", color=white];
+
+    { rank=same; start; start_label; }
+    { rank=same; end; end_label; }
+
+    // Invisible edges for proper label positioning
+    start -> start_label [style=invis];
+    end -> end_label [style=invis];
+}
+"""
+
+# Visualize the example BPMN model
+visualize_bpmn(dot_string)

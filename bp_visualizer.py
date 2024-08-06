@@ -21,6 +21,7 @@ Instructions:
 - Use a circle to represent the Start Event.
 - Use a thick bold circle to represent the End Event.
 - Follow all best practices in BPMN modeling to ensure clarity and accuracy.
+- DO NOT output additional text except the DOT language. Do not output ```dot or ```
 
 Example:
 
@@ -180,8 +181,13 @@ def visualize_bpmn(dot_string):
     Parameters:
         dot_string (str): The DOT language representation of the BPMN model.
     """
-    graph = graphviz.Source(dot_string)
-    graph.render('bpmn_model', format='png', view=True)
+    try:
+        graph = graphviz.Source(dot_string)  # Create Graphviz Source object
+        graph.render('bpmn_model', format='svg', view=True)  # Render and view the graph
+        print("Graphviz visualization generated successfully.")
+    except Exception as e:
+        print("Error in generating visualization:", e)  # Print error message if any
+
 
 def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0.0):
     """
@@ -204,27 +210,27 @@ def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0
     #     return {"error": "Failed to decode JSON response"}
 
 # Example usage
-if __name__ == "__main__":
-    text_description = """
-    [
-        {
-            "SequenceFlows": [
-                {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
-                {"from": "A_ReviewDocuments", "to": "XOR_ReviewDocuments"},
-                {"from": "XOR_ReviewDocuments", "to": "A_ReturnForCorrection", "condition": "if documents are missing or incorrect"},
-                {"from": "XOR_ReviewDocuments", "to": "A_ScheduleOrientation", "condition": "if documents are complete and correct"},
-                {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
-                {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
-                {"from": "E_AttendOrientation", "to": "XOR_OnboardingComplete"},
-                {"from": "XOR_OnboardingComplete", "to": "A_AssignToDepartment"},
-                {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
-            ]
-        }
-    ]
-    """
-    result = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.7)
-    print(result)
+# if __name__ == "__main__":
+#     text_description = """
+#     [
+#         {
+#             "SequenceFlows": [
+#                 {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
+#                 {"from": "A_ReviewDocuments", "to": "XOR_ReviewDocuments"},
+#                 {"from": "XOR_ReviewDocuments", "to": "A_ReturnForCorrection", "condition": "if documents are missing or incorrect"},
+#                 {"from": "XOR_ReviewDocuments", "to": "A_ScheduleOrientation", "condition": "if documents are complete and correct"},
+#                 {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
+#                 {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
+#                 {"from": "E_AttendOrientation", "to": "XOR_OnboardingComplete"},
+#                 {"from": "XOR_OnboardingComplete", "to": "A_AssignToDepartment"},
+#                 {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
+#             ]
+#         }
+#     ]
+#     """
+#     result = identify_from_message(text_description, api="openai", model="gpt-4o", temperature=0)
+#     print(result)
+#     # Visualize the result
+#     visualize_bpmn(result)
 
 # %%
-# Visualize the result
-visualize_bpmn(result)

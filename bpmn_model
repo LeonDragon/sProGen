@@ -1,0 +1,32 @@
+digraph BPMN {
+    rankdir=LR;
+    node [shape=circle, style=filled, color=lightblue];
+
+    // Start and End nodes
+    start_receive_inquiry [label="", color=green];
+    end_approve_response [label="", color=red, penwidth=3];
+
+    // Activities
+    node [shape=box, style=rounded, color=lightgreen];
+    a_register_inquiry [label="A_RegisterInquiry"];
+    a_investigate_inquiry [label="A_InvestigateInquiry"];
+    a_prepare_response [label="A_PrepareResponse"];
+    a_review_response [label="A_ReviewResponse"];
+    a_prepare_response_again [label="A_PrepareResponseAgain"];
+
+    // Gateways
+    node [shape=diamond, style=filled, color="#FFD700"];
+    xor_review_response [label="X"];
+    xor_prepare_response_again [label="X"];
+
+    // Edges
+    start_receive_inquiry -> a_register_inquiry;
+    a_register_inquiry -> a_investigate_inquiry;
+    a_investigate_inquiry -> a_prepare_response;
+    a_prepare_response -> a_review_response;
+    a_review_response -> xor_review_response;
+    xor_review_response -> a_prepare_response_again [label="if response is not approved"];
+    xor_review_response -> end_approve_response [label="if response is approved"];
+    a_prepare_response_again -> xor_prepare_response_again;
+    xor_prepare_response_again -> a_review_response;
+}
