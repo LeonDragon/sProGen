@@ -21,129 +21,82 @@ Instructions:
 - Use a circle to represent the Start Event.
 - Use a thick bold circle to represent the End Event.
 - Follow all best practices in BPMN modeling to ensure clarity and accuracy.
+- Please use "\n" to break up labels (e.g., label=) if they are lengthy.
 - DO NOT output additional text except the DOT language. Do not output ```dot or ```
 
 Example:
 
 Input:
 "SequenceFlows": [
-    {
-        "from": "Start",
-        "to": "Activity 1"
-    },
-    {
-        "from": "Activity 1",
-        "to": "Split Gateway"
-    },
-    {
-        "from": "Split Gateway",
-        "to": "Activity 2",
-        "condition": "Condition A"
-    },
-    {
-        "from": "Split Gateway",
-        "to": "Activity 3",
-        "condition": "Condition B"
-    },
-    {
-        "from": "Activity 2",
-        "to": "Join Gateway 1"
-    },
-    {
-        "from": "Activity 3",
-        "to": "Join Gateway 1"
-    },
-    {
-        "from": "Join Gateway 1",
-        "to": "Activity 4"
-    },
-    {
-        "from": "Activity 4",
-        "to": "Split Gateway 2"
-    },
-    {
-        "from": "Split Gateway 2",
-        "to": "Activity 5",
-        "condition": "Condition C"
-    },
-    {
-        "from": "Split Gateway 2",
-        "to": "Join Gateway 2",
-        "condition": "Condition D"
-    },
-    {
-        "from": "Activity 5",
-        "to": "Join Gateway 2"
-    },
-    {
-        "from": "Join Gateway 2",
-        "to": "Loop Gateway"
-    },
-    {
-        "from": "Loop Gateway",
-        "to": "Activity 1",
-        "condition": "Loop Condition"
-    },
-    {
-        "from": "Loop Gateway",
-        "to": "End",
-        "condition": "Exit Loop"
-    }
-]
+            {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
+            {"from": "A_ReviewDocuments", "to": "XOR_ReviewDocuments"},
+            {"from": "XOR_ReviewDocuments", "to": "A_ReturnForCorrection", "condition": "if documents are missing or incorrect"},
+            {"from": "XOR_ReviewDocuments", "to": "A_ScheduleOrientation", "condition": "if documents are complete and correct"},
+            {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
+            {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
+            {"from": "E_AttendOrientation", "to": "XOR_OnboardingComplete"},
+            {"from": "XOR_OnboardingComplete", "to": "A_AssignToDepartment"},
+            {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
+        ]
 
 
 Output:
 digraph BPMN {
     rankdir=LR;
-    node [shape=circle, style=filled, color=lightblue];
+    node [shape=circle, style=filled, color=lightblue, penwidth=2];
 
     // Start and End nodes
-    start [label="", color=green];
-    end [label="", color=red, penwidth=3];
+    Start_SubmitPaperwork [label="", color=forestgreen];
+    End_AssignDepartment [label="", color=firebrick, penwidth=3];
 
     // Activities
-    node [shape=box, style=rounded, color=lightgreen];
-    activity1 [label="Activity 1"];
-    activity2 [label="Activity 2"];
-    activity3 [label="Activity 3"];
-    activity4 [label="Activity 4"];
-    activity5 [label="Activity 5"];
+    node [
+        shape=box, 
+        style="rounded,filled", 
+        fillcolor=lightgoldenrodyellow, 
+        color=black,
+        penwidth=1, 
+        fontcolor=black];
+    A_ReviewDocuments [label="Review \n Documents"];
+    A_ReturnForCorrection [label="Return For \n Correction"];
+    A_ScheduleOrientation [label="Schedule \n Orientation"];
+    E_AttendOrientation [label="Attend \n Orientation"];
+    A_AssignToDepartment [label="Assign To \n Department"];
 
     // Gateways
-    node [shape=diamond, style=filled, color="#FFD700"];
-    split_gateway [label="Split Gateway"];
-    join_gateway1 [label="Join Gateway 1"];
-    split_gateway2 [label="Split Gateway 2"];
-    join_gateway2 [label="Join Gateway 2"];
-    loop_gateway [label="Loop Gateway"];
+    node [
+        shape=diamond, 
+        style=filled, 
+        fillcolor=gold, 
+        color=black, 
+        penwidth=1];
+    XOR_ReviewDocuments [label="X"];
+    XOR_OnboardingComplete [label="X"];
 
     // Edges
-    start -> activity1;
-    activity1 -> split_gateway;
-    split_gateway -> activity2 [label="Condition A"];
-    split_gateway -> activity3 [label="Condition B"];
-    activity2 -> join_gateway1;
-    activity3 -> join_gateway1;
-    join_gateway1 -> activity4;
-    activity4 -> split_gateway2;
-    split_gateway2 -> activity5 [label="Condition C"];
-    split_gateway2 -> join_gateway2 [label="Condition D"];
-    activity5 -> join_gateway2;
-    join_gateway2 -> loop_gateway;
-    loop_gateway -> activity1 [label="Loop Condition"];
-    loop_gateway -> end [label="Exit Loop"];
+    Start_SubmitPaperwork -> A_ReviewDocuments;
+    A_ReviewDocuments -> XOR_ReviewDocuments;
+
+    XOR_ReviewDocuments -> A_ReturnForCorrection [label="if documents are \n missing or incorrect"];
+    XOR_ReviewDocuments -> A_ScheduleOrientation [label="if documents are \n complete and correct"];
+    A_ReturnForCorrection -> A_ReviewDocuments;
+    A_ScheduleOrientation -> E_AttendOrientation;
+    E_AttendOrientation -> XOR_OnboardingComplete;
+    XOR_OnboardingComplete -> A_AssignToDepartment;
+    A_AssignToDepartment -> End_AssignDepartment;
 
     // Labels positioned below the nodes
-    start_label [shape=plaintext, label="Start_ ...", color=white];
-    end_label [shape=plaintext, label="End_ ...", color=white];
+    start_label [shape=plaintext, label="Start: Submit Paperwork", fillcolor=white];
+    end_label [shape=plaintext, label="End: Assign Department", fillcolor=white];
 
-    { rank=same; start; start_label; }
-    { rank=same; end; end_label; }
+    { rank=same; Start_SubmitPaperwork; start_label; }
+    { rank=same; End_AssignDepartment; end_label; }
 
     // Invisible edges for proper label positioning
-    start -> start_label [style=invis];
-    end -> end_label [style=invis];
+    Start_SubmitPaperwork -> start_label [style=invis];
+    End_AssignDepartment -> end_label [style=invis];
 }
+
 """
 
 def construct_user_message(text):
@@ -210,27 +163,27 @@ def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0
     #     return {"error": "Failed to decode JSON response"}
 
 # Example usage
-# if __name__ == "__main__":
-#     text_description = """
-#     [
-#         {
-#             "SequenceFlows": [
-#                 {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
-#                 {"from": "A_ReviewDocuments", "to": "XOR_ReviewDocuments"},
-#                 {"from": "XOR_ReviewDocuments", "to": "A_ReturnForCorrection", "condition": "if documents are missing or incorrect"},
-#                 {"from": "XOR_ReviewDocuments", "to": "A_ScheduleOrientation", "condition": "if documents are complete and correct"},
-#                 {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
-#                 {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
-#                 {"from": "E_AttendOrientation", "to": "XOR_OnboardingComplete"},
-#                 {"from": "XOR_OnboardingComplete", "to": "A_AssignToDepartment"},
-#                 {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
-#             ]
-#         }
-#     ]
-#     """
-#     result = identify_from_message(text_description, api="openai", model="gpt-4o", temperature=0)
-#     print(result)
-#     # Visualize the result
-#     visualize_bpmn(result)
+if __name__ == "__main__":
+    text_description = """
+    [
+        {
+            "SequenceFlows": [
+                {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
+                {"from": "A_ReviewDocuments", "to": "XOR_ReviewDocuments"},
+                {"from": "XOR_ReviewDocuments", "to": "A_ReturnForCorrection", "condition": "if documents are missing or incorrect"},
+                {"from": "XOR_ReviewDocuments", "to": "A_ScheduleOrientation", "condition": "if documents are complete and correct"},
+                {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
+                {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
+                {"from": "E_AttendOrientation", "to": "XOR_OnboardingComplete"},
+                {"from": "XOR_OnboardingComplete", "to": "A_AssignToDepartment"},
+                {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
+            ]
+        }
+    ]
+    """
+    result = identify_from_message(text_description, api="openai", model="gpt-4o", temperature=0)
+    print(result)
+    # Visualize the result
+    visualize_bpmn(result)
 
 # %%

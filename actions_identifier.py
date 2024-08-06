@@ -23,6 +23,7 @@ Instructions:
 - Identify Activities/Events: Identify specific actions or tasks described in the text and event usually in verb forms, assigning a variable to each (e.g., A_RecieveOrder, A_CheckCredit, E_RecieveEmail) (note that A for activities or tasks, E for Events). List of distinct activities without any redundancy.
     - Textual Clues: These are the core actions that drive the process forward. Look for verbs or action phrases like "register", "investigate", "prepare", "review", "approve", "admit", "examine", "process", "schedule", or "conduct".
 - Identify Participants: Identify the single participant involved in each activity or event and include them in the output.
+- - DO NOT output additional text except the JSON format. Do not output ```json or ```
 
 Examples:
 
@@ -221,8 +222,8 @@ def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0
     messages = construct_messages(system_message, user_message)
 
     #response = get_completion(messages, api="ollama", model="llama3.1", max_tokens=1000, temperature=0.0)
-    response = get_completion(messages, api, model, temperature)
-    return response
+    response, prompt_tokens, completion_tokens = get_completion(messages, api, model, temperature)
+    return response, prompt_tokens, completion_tokens
     # try:
     #     return json.loads(response)
     # except json.JSONDecodeError:
@@ -247,7 +248,7 @@ if __name__ == "__main__":
         }
     ]
     """
-    result = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.0)
+    result, prompt_tokens, completion_tokens = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.0)
     print(result)
 
 # %%

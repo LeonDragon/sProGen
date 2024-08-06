@@ -1,32 +1,58 @@
 digraph BPMN {
     rankdir=LR;
-    node [shape=circle, style=filled, color=lightblue];
+    node [shape=circle, style=filled, color=lightblue, penwidth=2];
 
     // Start and End nodes
-    start_receive_inquiry [label="", color=green];
-    end_approve_response [label="", color=red, penwidth=3];
+    Start_ReceiveOrder [label="", color=forestgreen];
+    End_RegisterOrder [label="", color=firebrick, penwidth=3];
 
     // Activities
-    node [shape=box, style=rounded, color=lightgreen];
-    a_register_inquiry [label="A_RegisterInquiry"];
-    a_investigate_inquiry [label="A_InvestigateInquiry"];
-    a_prepare_response [label="A_PrepareResponse"];
-    a_review_response [label="A_ReviewResponse"];
-    a_prepare_response_again [label="A_PrepareResponseAgain"];
+    node [
+        shape=box, 
+        style="rounded,filled", 
+        fillcolor=lightgoldenrodyellow, 
+        color=black,
+        penwidth=1, 
+        fontcolor=black];
+    A_SendSubOrderAmsterdam [label="Send Sub 
+ Order Amsterdam"];
+    A_SendSubOrderHamburg [label="Send Sub 
+ Order Hamburg"];
+    A_RegisterOrder [label="Register 
+ Order"];
 
     // Gateways
-    node [shape=diamond, style=filled, color="#FFD700"];
-    xor_review_response [label="X"];
-    xor_prepare_response_again [label="X"];
+    node [
+        shape=diamond, 
+        style=filled, 
+        fillcolor=gold, 
+        color=black, 
+        penwidth=1];
+    OR_DistributeOrder [label="O"];
+    AND_RegisterOrder [label="+"];
 
     // Edges
-    start_receive_inquiry -> a_register_inquiry;
-    a_register_inquiry -> a_investigate_inquiry;
-    a_investigate_inquiry -> a_prepare_response;
-    a_prepare_response -> a_review_response;
-    a_review_response -> xor_review_response;
-    xor_review_response -> a_prepare_response_again [label="if response is not approved"];
-    xor_review_response -> end_approve_response [label="if response is approved"];
-    a_prepare_response_again -> xor_prepare_response_again;
-    xor_prepare_response_again -> a_review_response;
+    Start_ReceiveOrder -> OR_DistributeOrder;
+
+    OR_DistributeOrder -> A_SendSubOrderAmsterdam [label="if some of the 
+ relevant products are 
+ maintained in Amsterdam"];
+    OR_DistributeOrder -> A_SendSubOrderHamburg [label="if some relevant 
+ products are 
+ maintained in Hamburg"];
+    A_SendSubOrderAmsterdam -> AND_RegisterOrder;
+    A_SendSubOrderHamburg -> AND_RegisterOrder;
+    AND_RegisterOrder -> A_RegisterOrder;
+    A_RegisterOrder -> End_RegisterOrder;
+
+    // Labels positioned below the nodes
+    start_label [shape=plaintext, label="Start: Receive Order", fillcolor=white];
+    end_label [shape=plaintext, label="End: Register Order", fillcolor=white];
+
+    { rank=same; Start_ReceiveOrder; start_label; }
+    { rank=same; End_RegisterOrder; end_label; }
+
+    // Invisible edges for proper label positioning
+    Start_ReceiveOrder -> start_label [style=invis];
+    End_RegisterOrder -> end_label [style=invis];
 }

@@ -203,8 +203,8 @@ def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0
     messages = construct_messages(system_message, user_message)
 
     #response = get_completion(messages, api="ollama", model="llama3.1", max_tokens=1000, temperature=0.0)
-    response = get_completion(messages, api, model, temperature)
-    return response
+    response, prompt_tokens, completion_tokens = get_completion(messages, api, model, temperature)
+    return response, prompt_tokens, completion_tokens
     # try:
     #     return json.loads(response)
     # except json.JSONDecodeError:
@@ -237,7 +237,7 @@ if __name__ == "__main__":
     ]
 
     """
-    result = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.0)
+    result, prompt_tokens, completion_tokens = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.0)
     print(result)
 
 # %%

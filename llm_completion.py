@@ -3,6 +3,8 @@ from langchain_ollama.llms import OllamaLLM
 from config import OPENAI_API_KEY
 
 def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.7, max_tokens=500):
+    prompt_tokens = 0
+    completion_tokens = 0
     if api == "openai":
         client = OpenAI(api_key=OPENAI_API_KEY)
         response = client.chat.completions.create(
@@ -12,6 +14,8 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.7,
             max_tokens=max_tokens,
         )
         result = response.choices[0].message.content
+        prompt_tokens= response.usage.prompt_tokens
+        completion_tokens = response.usage.completion_tokens
     elif api == "ollama":
         ollama_llm = OllamaLLM(
             model=model,
@@ -23,7 +27,7 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", temperature=0.7,
     else:
         raise ValueError("Unsupported API specified. Choose 'openai' or 'ollama'.")
     
-    return result
+    return result, prompt_tokens, completion_tokens
 
 
 # # TEST THE API
