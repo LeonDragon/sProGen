@@ -2,6 +2,7 @@
 # STEP 7 - VISUALIZE BPM MODEL
 import json
 from llm_completion import get_completion
+import graphviz
 
 # Constants for system and user messages
 delimiter = "####"
@@ -172,6 +173,16 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
+def visualize_bpmn(dot_string):
+    """
+    Visualizes a BPMN model using Graphviz.
+
+    Parameters:
+        dot_string (str): The DOT language representation of the BPMN model.
+    """
+    graph = graphviz.Source(dot_string)
+    graph.render('bpmn_model', format='png', view=True)
+
 def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0.0):
     """
     Identifies sequence flows in a business process description.
@@ -215,3 +226,5 @@ if __name__ == "__main__":
     print(result)
 
 # %%
+# Visualize the result
+visualize_bpmn(result)
