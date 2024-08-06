@@ -87,7 +87,7 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
-def identify_from_message(text):
+def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0.0):
     """
     Identifies context in a business process description.
     Parameters:
@@ -100,7 +100,7 @@ def identify_from_message(text):
     messages = construct_messages(system_message, user_message)
 
     #response = get_completion(messages, api="ollama", model="llama3.1", max_tokens=1000, temperature=0.0)
-    response = get_completion(messages, api="openai", model="gpt-4o", temperature=0.0)
+    response = get_completion(messages, api, model, temperature)
     return response
     # try:
     #     return json.loads(response)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     Relevant Process Description information:
     Once a loan application is received by the loan provider, and before proceeding with its assessment, the application itself needs to be checked for completeness. If the application is incomplete, it is returned to the applicant, so that they can fill out the missing information and send it back to the loan provider. This process is repeated until the application is found complete.
     """
-    result = identify_from_message(text_description)
+    result = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.0)
     print(result)
 
 # %%

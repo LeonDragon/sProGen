@@ -58,42 +58,42 @@ def pipeline(process_description):
 
     # Step 1: Preprocessing to improve the textual description
     print("Step 1: ======================= \n")
-    preprocess_result = preprocess_identify_from_message(process_description)
+    preprocess_result = preprocess_identify_from_message(process_description, api="openai", model="gpt-4o-mini", temperature=0.0)
     print(preprocess_result)
-    new_process_description = json.loads(preprocess_result)[0]["Augmentation"]
+    new_process_description = json.loads(preprocess_result)[0]["Original"] #Original or Augmented
     print(new_process_description)
     
     # Step 2: Context understanding to identify context and objectives
     print("Step 2: ======================= \n")
-    context_json_result = context_identify_from_message(new_process_description)
+    context_json_result = context_identify_from_message(new_process_description, api="openai", model="gpt-4o-mini", temperature=0.0)
     previous_json_result = context_json_result
     combined_prompt = combine_results("", context_json_result, new_process_description)
     print(combined_prompt)
     
     # Step 3: Identifying actions
     print("Step 3: ======================= \n")
-    actions_json_result = actions_identify_from_message(combined_prompt)
+    actions_json_result = actions_identify_from_message(combined_prompt, api="openai", model="gpt-4o", temperature=0.0)
     previous_json_result = combine_results(previous_json_result, actions_json_result)
     combined_prompt = combine_results(previous_json_result, actions_json_result, new_process_description)
     print(combined_prompt)
     
     # Step 4: Identifying gateways
     print("Step 4: ======================= \n")
-    gateways_json_result = gateways_identify_from_message(combined_prompt)
+    gateways_json_result = gateways_identify_from_message(combined_prompt, api="openai", model="gpt-4o", temperature=0.0)
     previous_json_result = combine_results(previous_json_result, gateways_json_result)
     combined_prompt = combine_results(previous_json_result, gateways_json_result, new_process_description)
     print(combined_prompt)
     
     # Step 5: Identifying loops
     print("Step 5: ======================= \n")
-    loops_json_result = loops_identify_from_message(combined_prompt)
+    loops_json_result = loops_identify_from_message(combined_prompt, api="openai", model="gpt-4o", temperature=0.0)
     previous_json_result = combine_results(previous_json_result, loops_json_result)
     combined_prompt = combine_results(previous_json_result, loops_json_result, new_process_description)
     print(combined_prompt)
     
     # Step 6: Identifying sequence flows
     print("Step 6: ======================= \n")
-    sequence_flow_result = sequenceFlow_identify_from_message(combined_prompt)
+    sequence_flow_result = sequenceFlow_identify_from_message(combined_prompt, api="openai", model="gpt-4o", temperature=0.0)
     previous_json_result = combine_results(previous_json_result, sequence_flow_result)
     combined_prompt = combine_results(previous_json_result, sequence_flow_result, new_process_description)
     print(combined_prompt)

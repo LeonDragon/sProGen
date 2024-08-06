@@ -114,7 +114,7 @@ The employee onboarding process begins when a new hire submits their completed p
         ],
         "StartEvent": "Start_SubmitPaperwork",
         "EndEvent": "End_AssignDepartment",
-        "ActivitiesEvent": [
+        "ActivitiesEvents": [
             {"A_ReviewDocuments": "The HR department reviews the submitted documents"},
             {"A_ReturnForCorrection": "If any documents are missing or incorrect, they are returned to the new hire for correction"},
             {"A_ScheduleOrientation": "Once the documents are in order, the new hire is scheduled for orientation"},
@@ -190,7 +190,7 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
-def identify_from_message(text):
+def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0.0):
     """
     Identifies gateways in a business process description.
     Parameters:
@@ -203,7 +203,7 @@ def identify_from_message(text):
     messages = construct_messages(system_message, user_message)
 
     #response = get_completion(messages, api="ollama", model="llama3.1", max_tokens=1000, temperature=0.0)
-    response = get_completion(messages, api="openai", model="gpt-4o", temperature=0.0)
+    response = get_completion(messages, api, model, temperature)
     return response
     # try:
     #     return json.loads(response)
@@ -237,7 +237,7 @@ if __name__ == "__main__":
     ]
 
     """
-    result = identify_from_message(text_description)
+    result = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0.0)
     print(result)
 
 # %%
