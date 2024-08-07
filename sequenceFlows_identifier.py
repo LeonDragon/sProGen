@@ -17,6 +17,7 @@ Instructions:
 - Using the list of provided "ActivitiesEvent" and list of provided "Gateways", and list of provided "Loops" (if any), define the sequence flows.
 - Establish the order of activities, events, and gateways, detailing the sequence flow with variables.
 - Clearly distinguish between the types of gateways and represent the conditional (XOR, OR) and parallel (AND) flows accurately.
+- DO NOT output additional text except the JSON format. Do not output ```json or ```
 
 
 Examples:
@@ -71,7 +72,7 @@ The employee onboarding process begins when a new hire submits their completed p
                 "GatewaysForLoopEntries":[],
                 "GatewaysForLoopExits":[
                     {
-                        "LoopExit1": XOR_ReviewDocuments
+                        "LoopExit1": "XOR_ReviewDocuments"
                     }
                 ],
                 "ActivitiesInLoop": [

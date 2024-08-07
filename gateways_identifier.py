@@ -9,6 +9,7 @@ delimiter = "####"
 SYSTEM_MESSAGE_TEMPLATE = """
 You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
 
+Explanation:
 To accurately identify gateways for decision points and parallelism in BPMN, you need to understand the following concepts:
     1) XOR Split (Exclusive Gateway)
         - Definition: Used to model decision points where only one of the available paths can be taken (either/or decision).
@@ -72,13 +73,14 @@ To accurately identify gateways for decision points and parallelism in BPMN, you
                 Path 1: Task: Technical approval
                 Path 2: Task: Financial approval
 
-TASK: Given the process description and the list of Activities/Events (also called "Nodes") identified from this description within the delimiters {delimiter}, please Identify as many gateways as you can by performing the following steps:
+TASK: Given the process description and the list of Activities/Events (also called "Nodes") identified from this description within the delimiters {delimiter}. Output a Python list of JSON objects. Ensure the output is strictly in JSON format without any additional text. Please Identify as many gateways as you can by performing the following steps:
 
 Instructions:
 - Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details. Try to identify gateways.
-- Using the list of provided "ActivitiesEvent", identify gateways.
-- List all identified gateways along with textual clues that led to the decision. Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway. Do not print out this step.
+- Using the list of provided "ActivitiesEvent", identify gateways along with textual clues that led to the decision. 
+- Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway.
 - Output a Python list of JSON objects, detailing the gateways identified in Step 1. Ensure the output is strictly in JSON format without any additional text. Do not print out Step 1.
+- DO NOT output additional text except the JSON format. Do not output ```json or ```
 
 JSON Object Structure
 - total_gateways: Total number of gateways identified. total_gateways = total_XOR_split + total_XOR_join + total_AND_split + total_AND_join + total_OR_split + total_OR_join
@@ -93,10 +95,42 @@ JSON Object Structure
     -- name: Placeholder name for the gateway.
     -- type: Type of gateway (XOR, AND, OR).
     -- classification: Indicates whether the gateway is a "split" or "join".
+    -- conditions: Specify the splitting condition for divergence gateways and the merging (joining) condition for convergence gateways.
     -- from_node: Node(s) preceding the gateway.
     -- to_nodes: Node(s) following the gateway.
     -- reason: This is a description explaining (clues) why you can make that inference.
 
+    
+
+Examples:
+
+Example 1:
+Input:
+
+Output:
+
+Example 2:
+Input:
+
+Output:
+
+Example 3:
+Input:
+
+Output:
+
+Example 4:
+Input:
+
+Output:
+
+Example 5:
+Input:
+
+Output:
+
+
+=====================================================
 Examples:
 
 Input:
@@ -140,6 +174,16 @@ Output:
                 "name": "XOR_ReviewDocuments",
                 "type": "XOR",
                 "classification": "split",
+                "conditions": [
+                    {
+                        "condition": "If any documents are missing or incorrect, return to new hire for correction",
+                        "to_node": "A_ReturnForCorrection"
+                    },
+                    {
+                        "condition": "If all documents are complete and correct, schedule orientation",
+                        "to_node": "A_ScheduleOrientation"
+                    }
+                ],
                 "from_node": ["A_ReviewDocuments"],
                 "to_nodes": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "reason": "If any documents are missing or incorrect, they are returned to the new hire for correction. Otherwise, the new hire is scheduled for orientation."
@@ -149,9 +193,15 @@ Output:
                 "name": "XOR_OnboardingComplete",
                 "type": "XOR",
                 "classification": "join",
+                "conditions": [
+                    {
+                        "condition": "All necessary steps are completed, assign to department",
+                        "to_node": "A_AssignToDepartment"
+                    }
+                ],
                 "from_node": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "to_nodes": ["A_AssignToDepartment"],
-                "reason": "After attending the orientation, the new hire is assigned to their department."
+                "reason": "After attending the orientation and completing all necessary steps, the new hire is assigned to their department."
             }
         ]
     }

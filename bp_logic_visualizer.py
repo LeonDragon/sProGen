@@ -103,8 +103,8 @@ def visualize_bpmn(dot_string, file_name='bpmn_model', directory='.', file_forma
 # Example usage
 if __name__ == "__main__":
      # JSON string input
-    json_string = '''
-    [
+    json_string_org = '''
+     [
         {
             "SequenceFlows": [
                 {"from": "Start_ReceiveInquiry", "to": "A_RegisterInquiry"},
@@ -115,6 +115,26 @@ if __name__ == "__main__":
                 {"from": "XOR_ResponseApproval", "to": "A_ResubmitResponse", "condition": "if the response is not approved"},
                 {"from": "XOR_ResponseApproval", "to": "End_ApproveResponse", "condition": "if the response is approved"},
                 {"from": "A_ResubmitResponse", "to": "A_PrepareResponse"}
+            ]
+        }
+    ]
+    '''
+
+    json_string = '''
+    [
+        {
+            "SequenceFlows": [
+                {"from": "Start_ReceiveInquiry", "to": "XOR_RegisterInquiry"},
+                {"from": "XOR_RegisterInquiry", "to": "A_RegisterInquiry"},
+                {"from": "XOR_RegisterInquiry", "to": "A_InvestigateInquiry"},
+                {"from": "A_RegisterInquiry", "to": "A_InvestigateInquiry"},
+                {"from": "A_InvestigateInquiry", "to": "A_PrepareResponse"},
+                {"from": "A_PrepareResponse", "to": "E_ReviewResponse"},
+                {"from": "E_ReviewResponse", "to": "XOR_ApproveResponse"},
+                {"from": "XOR_ApproveResponse", "to": "End_ApproveResponse", "condition": "if approved"},
+                {"from": "A_PrepareForRevision", "to": "A_InvestigateInquiry"},
+                {"from": "A_PrepareForRevision", "to": "E_ReviewResponse"},
+                {"from": "XOR_ApproveResponse", "to": "A_PrepareForRevision", "condition": "if not approved"}
             ]
         }
     ]

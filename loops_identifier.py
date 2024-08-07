@@ -25,6 +25,7 @@ Instructions:
 - Examine Feedback Mechanisms: Check for feedback loops where the output or result of a process step is evaluated, and based on the evaluation, the process may loop back to an earlier step for rework or further action.
 - Identify Loop Control Conditions: Understand the conditions under which the loop continues and the conditions under which the loop terminates. This helps to accurately model the loop in BPMN.
     - Textual Clues: Conditions or criteria for repetition, such as "until approved", "while not complete", or "as long as".
+- DO NOT output additional text except the JSON format. Do not output ```json or ```
 
 
 
@@ -52,7 +53,14 @@ The employee onboarding process begins when a new hire submits their completed p
             {"E_AttendOrientation": "After attending the orientation"},
             {"A_AssignToDepartment": "the new hire is assigned to their department"}
         ],
-        "gateways": [
+        "total_gateways": 2,
+        "total_XOR_split": 1,
+        "total_XOR_join": 1,
+        "total_AND_split": 0,
+        "total_AND_join": 0,
+        "total_OR_split": 0,
+        "total_OR_join": 0,
+        "Gateways": [
             {
                 "id": "G1",
                 "name": "XOR_ReviewDocuments",
@@ -86,7 +94,7 @@ Output:
                 "GatewaysForLoopEntries":[],
                 "GatewaysForLoopExits":[
                     {
-                        "LoopExit1": XOR_ReviewDocuments
+                        "LoopExit1": "XOR_ReviewDocuments"
                     }
                 ],
                 "ActivitiesInLoop": [
