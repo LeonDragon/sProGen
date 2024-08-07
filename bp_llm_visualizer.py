@@ -3,6 +3,7 @@
 import json
 from llm_completion import get_completion
 import graphviz
+import os
 
 # Constants for system and user messages
 delimiter = "####"
@@ -21,7 +22,6 @@ Instructions:
 - Use a circle to represent the Start Event.
 - Use a thick bold circle to represent the End Event.
 - Follow all best practices in BPMN modeling to ensure clarity and accuracy.
-- Please use "\n" to break up labels (e.g., label=) if they are lengthy.
 - DO NOT output additional text except the DOT language. Do not output ```dot or ```
 
 Example:
@@ -127,17 +127,31 @@ def construct_messages(system_message, user_message):
         {'role': 'user', 'content': user_message}
     ]
 
-def visualize_bpmn(dot_string):
+def visualize_bpmn(dot_string, file_name='bpmn_model', directory='.', file_format='svg'):
     """
     Visualizes a BPMN model using Graphviz.
-
+    
     Parameters:
         dot_string (str): The DOT language representation of the BPMN model.
+        file_name (str): The name of the output file (without extension).
+        directory (str): The directory where the output file will be saved.
+        file_format (str): The format of the output file (e.g., 'svg', 'png', 'pdf').
     """
     try:
-        graph = graphviz.Source(dot_string)  # Create Graphviz Source object
-        graph.render('bpmn_model', format='svg', view=True)  # Render and view the graph
-        print("Graphviz visualization generated successfully.")
+        # Ensure the directory exists
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        
+        # Create the full file path
+        file_path = os.path.join(directory, file_name)
+        
+        # Create Graphviz Source object
+        graph = graphviz.Source(dot_string)
+        
+        # Render and view the graph
+        graph.render(file_path, format=file_format, view=True)
+        
+        print(f"Graphviz visualization generated successfully at {file_path}.{file_format}.")
     except Exception as e:
         print("Error in generating visualization:", e)  # Print error message if any
 
@@ -181,9 +195,9 @@ if __name__ == "__main__":
         }
     ]
     """
-    result = identify_from_message(text_description, api="openai", model="gpt-4o", temperature=0)
-    print(result)
+    dot_result = identify_from_message(text_description, api="openai", model="gpt-4o-mini", temperature=0)
+    print(dot_result)
     # Visualize the result
-    visualize_bpmn(result)
+    visualize_bpmn(dot_result, file_name='my_bpmn_model', directory='./output', file_format='svg')
 
 # %%

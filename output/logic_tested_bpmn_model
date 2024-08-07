@@ -1,0 +1,37 @@
+digraph BPMN {
+    rankdir=LR;
+    node [shape=circle, style=filled, color=lightblue, penwidth=2];
+    Start_ReceiveInquiry [label="", color=forestgreen];
+    End_ApproveResponse [label="", color=firebrick, penwidth=3];
+
+    node [
+        shape=box, 
+        style="rounded,filled", 
+        fillcolor=lightgoldenrodyellow, 
+        color=black,
+        penwidth=1, 
+        fontcolor=black
+    ];
+    A_RegisterInquiry [label="RegisterInquiry"];
+    A_PrepareResponse [label="PrepareResponse"];
+    A_InvestigateInquiry [label="InvestigateInquiry"];
+    A_ResubmitResponse [label="ResubmitResponse"];
+    A_ReviewResponse [label="ReviewResponse"];
+
+    node [
+        shape=diamond, 
+        style=filled, 
+        fillcolor=gold, 
+        color=black, 
+        penwidth=1
+    ];
+    XOR_ResponseApproval [label="XOR"];
+    Start_ReceiveInquiry -> A_RegisterInquiry;
+    A_RegisterInquiry -> A_InvestigateInquiry;
+    A_InvestigateInquiry -> A_PrepareResponse;
+    A_PrepareResponse -> A_ReviewResponse;
+    A_ReviewResponse -> XOR_ResponseApproval;
+    XOR_ResponseApproval -> A_ResubmitResponse [label="if the response is not approved"];
+    XOR_ResponseApproval -> End_ApproveResponse [label="if the response is approved"];
+    A_ResubmitResponse -> A_PrepareResponse;
+}

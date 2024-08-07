@@ -101,7 +101,7 @@ def pipeline(process_description):
     
     # Step 5: Identifying loops
     print("Step 5: Identifying loops - DONE \n")
-    loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="openai", model="gpt-4o", temperature=0.0)
+    loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="openai", model="gpt-4o-mini", temperature=0.0)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     previous_json_result = combine_results(previous_json_result, loops_json_result)
@@ -119,11 +119,12 @@ def pipeline(process_description):
 
     # Step 7: Visualize Business Process with Graphviz
     print("Step 7: Visualize Business Process with Graphviz - DONE \n")
-    bp_dot, prompt_tokens, completion_tokens = bpm_visualization_from_message(sequence_flow_result, api="openai", model="gpt-4o", temperature=0.7)
+    bp_dot, prompt_tokens, completion_tokens = bpm_visualization_from_message(sequence_flow_result, api="openai", model="gpt-4o-mini", temperature=0.7)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
-    visualize_bpmn(bp_dot)
+    visualize_bpmn(bp_dot, file_name='my_bpmn_model', directory='./output', file_format='svg')
 
+    # Print out stats
     total_end_time = time.time()
     total_tokens = total_prompt_tokens + total_completion_tokens
     print(f"Total Computation time: {total_end_time - total_start_time:.4f} seconds")
@@ -135,11 +136,11 @@ def pipeline(process_description):
 
 # Example usage
 if __name__ == "__main__":
-    text_description = """
+    text_description_2 = """
     A company has two warehouses that store different products: Amsterdam and Hamburg. When an order is received, it is distributed across these warehouses: if some of the relevant products are maintained in Amsterdam, a sub-order is sent there; likewise, if some relevant products are maintained in Hamburg, a sub-order is sent there. Afterwards, the order is registered and the process completes. 
     """
 
-    text_description_2 = """
+    text_description = """
     Relevant Process Description information:
     In the treasury minister’s office, once a ministerial inquiry has been received, it is first registered into the system. Then the inquiry is investigated so that a ministerial response can be prepared. The finalization of a response includes the preparation of the response itself by the cabinet officer and the review of the response by the principal registrar. If the registrar does not approve the response, the latter needs to be prepared again by the cabinet officer for review. The process finishes only once the response has been approved. 
     """
@@ -150,8 +151,8 @@ if __name__ == "__main__":
 # %%
 print(result)
 # Step 7: Visualize Business Process with Graphviz
-print("Step 7: ======================= \n")
-bp_dot = bpm_visualization_from_message(sequenceFlows, api="openai", model="gpt-4o", temperature=0.7)
+print("Step 7: AGAIN \n")
+bp_dot = bpm_visualization_from_message(sequenceFlows, api="openai", model="gpt-4o-mini", temperature=0)
 print(bp_dot)
-visualize_bpmn(bp_dot)
+visualize_bpmn(bp_dot, file_name='my_bpmn_model_temp', directory='./output', file_format='svg')
 # %%

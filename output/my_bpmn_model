@@ -1,0 +1,132 @@
+digraph BPMN {
+    rankdir=LR;
+    node [shape=circle, style=filled, color=lightblue, penwidth=2];
+    Start_SubmitPaperwork [label="", color=forestgreen];
+    End_AssignDepartment [label="", color=firebrick, penwidth=3];
+
+    node [
+        shape=box, 
+        style="rounded,filled", 
+        fillcolor=lightgoldenrodyellow, 
+        color=black,
+        penwidth=1, 
+        fontcolor=black
+    ];
+    A_ReviewDocuments [label="
+R
+e
+v
+i
+e
+w
+D
+o
+c
+u
+m
+e
+n
+t
+s
+"];
+    E_AttendOrientation [label="
+A
+t
+t
+e
+n
+d
+O
+r
+i
+e
+n
+t
+a
+t
+i
+o
+n
+"];
+    A_AssignToDepartment [label="
+A
+s
+s
+i
+g
+n
+T
+o
+D
+e
+p
+a
+r
+t
+m
+e
+n
+t
+"];
+    A_ScheduleOrientation [label="
+S
+c
+h
+e
+d
+u
+l
+e
+O
+r
+i
+e
+n
+t
+a
+t
+i
+o
+n
+"];
+    A_ReturnForCorrection [label="
+R
+e
+t
+u
+r
+n
+F
+o
+r
+C
+o
+r
+r
+e
+c
+t
+i
+o
+n
+"];
+
+    node [
+        shape=diamond, 
+        style=filled, 
+        fillcolor=gold, 
+        color=black, 
+        penwidth=1
+    ];
+    XOR_ReviewDocuments [label="R"];
+    XOR_OnboardingComplete [label="O"];
+    Start_SubmitPaperwork -> A_ReviewDocuments;
+    A_ReviewDocuments -> XOR_ReviewDocuments;
+    XOR_ReviewDocuments -> A_ReturnForCorrection [label="if documents are missing or incorrect"];
+    XOR_ReviewDocuments -> A_ScheduleOrientation [label="if documents are complete and correct"];
+    A_ReturnForCorrection -> A_ReviewDocuments;
+    A_ScheduleOrientation -> E_AttendOrientation;
+    E_AttendOrientation -> XOR_OnboardingComplete;
+    XOR_OnboardingComplete -> A_AssignToDepartment;
+    A_AssignToDepartment -> End_AssignDepartment;
+}
