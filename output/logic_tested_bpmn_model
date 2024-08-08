@@ -12,11 +12,11 @@ digraph BPMN {
         penwidth=1, 
         fontcolor=black
     ];
-    A_InvestigateInquiry [label="InvestigateInquiry"];
     A_PrepareResponse [label="PrepareResponse"];
+    A_ResubmitResponse [label="ResubmitResponse"];
     A_RegisterInquiry [label="RegisterInquiry"];
-    E_ReviewResponse [label="ReviewResponse"];
-    A_PrepareForRevision [label="PrepareForRevision"];
+    A_InvestigateInquiry [label="InvestigateInquiry"];
+    A_ReviewResponse [label="ReviewResponse"];
 
     node [
         shape=diamond, 
@@ -25,17 +25,13 @@ digraph BPMN {
         color=black, 
         penwidth=1
     ];
-    XOR_ApproveResponse [label="XOR"];
-    XOR_RegisterInquiry [label="XOR"];
-    Start_ReceiveInquiry -> XOR_RegisterInquiry;
-    XOR_RegisterInquiry -> A_RegisterInquiry;
-    XOR_RegisterInquiry -> A_InvestigateInquiry;
+    XOR_ResponseApproval [label="XOR"];
+    Start_ReceiveInquiry -> A_RegisterInquiry;
     A_RegisterInquiry -> A_InvestigateInquiry;
     A_InvestigateInquiry -> A_PrepareResponse;
-    A_PrepareResponse -> E_ReviewResponse;
-    E_ReviewResponse -> XOR_ApproveResponse;
-    XOR_ApproveResponse -> End_ApproveResponse [label="if approved"];
-    A_PrepareForRevision -> A_InvestigateInquiry;
-    A_PrepareForRevision -> E_ReviewResponse;
-    XOR_ApproveResponse -> A_PrepareForRevision [label="if not approved"];
+    A_PrepareResponse -> A_ReviewResponse;
+    A_ReviewResponse -> XOR_ResponseApproval;
+    XOR_ResponseApproval -> A_ResubmitResponse [label="if the response is not approved"];
+    XOR_ResponseApproval -> End_ApproveResponse [label="if the response is approved"];
+    A_ResubmitResponse -> A_PrepareResponse;
 }

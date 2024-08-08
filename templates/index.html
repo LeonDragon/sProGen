@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Business Process Model Generator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #svg-container {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 100%;
+            max-width: 800px;
+            height: 0;
+            padding-bottom: 75%; /* Maintain aspect ratio (4:3) */
+            overflow: hidden; /* Ensure content does not overflow */
+            position: relative;
+        }
+
+        #svg-object {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .control-button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Business Process Model Generator</h1>
+    <form id="process-form">
+        <textarea name="description" id="description" rows="10" cols="50" placeholder="Enter process description..."></textarea><br>
+        <button type="submit">Generate Model</button>
+    </form>
+    <!-- Controls for zooming and panning -->
+    <div id="controls">
+        <button id="zoom-in" class="control-button">Zoom In</button>
+        <button id="zoom-out" class="control-button">Zoom Out</button>
+    </div>
+    <!-- Container to display the SVG -->
+    <div id="svg-container">
+        <object id="svg-object" type="image/svg+xml" data="">Your browser does not support SVG</object>
+    </div>
+
+    <script>
+        // Ensure DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.getElementById('process-form');
+            var svgObject = document.getElementById('svg-object');
+            var svgContainer = document.getElementById('svg-container');
+            var zoomLevel = 1;
+            var panX = 0;
+            var panY = 0;
+            var isPanning = false;
+            var startX, startY;
+
+            form.onsubmit = function(event) {
+                event.preventDefault();  // Stop the form from causing a page load
+                var description = document.getElementById('description').value;
+                fetch('/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'description=' + encodeURIComponent(description)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    svgObject.setAttribute('data', data.svg_url);
+                })
+                .catch(error => console.error('Error:', error));
+            };
+
+            document.getElementById('zoom-in').addEventListener('click', function() {
+                zoomLevel += 0.1;
+                updateTransform();
+            });
+
+            document.getElementById('zoom-out').addEventListener('click', function() {
+                zoomLevel -= 0.1;
+                updateTransform();
+            });
+
+            svgContainer.addEventListener('mousedown', function(event) {
+                isPanning = true;
+                startX = event.clientX - panX;
+                startY = event.clientY - panY;
+                svgContainer.style.cursor = 'grabbing';
+            });
+
+            svgContainer.addEventListener('mouseup', function() {
+                isPanning = false;
+                svgContainer.style.cursor = 'grab';
+            });
+
+            svgContainer.addEventListener('mousemove', function(event) {
+                if (!isPanning) return;
+                panX = event.clientX - startX;
+                panY = event.clientY - startY;
+                updateTransform();
+            });
+
+            function updateTransform() {
+                svgObject.style.transform = 'scale(' + zoomLevel + ') translate(' + panX + 'px, ' + panY + 'px)';
+                svgObject.style.transformOrigin = 'center center';
+            }
+        });
+    </script>
+</body>
+</html>

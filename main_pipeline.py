@@ -180,9 +180,9 @@ if __name__ == "__main__":
     #print(json.dumps(result, indent=4))
 
 #%%
-print(sequenceFlows)
+#print(sequenceFlows)
 # %%
-print(result)
+#print(result)
 # Step 7: Visualize Business Process with Graphviz
 #print("Step 7: AGAIN \n")
 #bp_dot = bp_llm_visualization_from_message(sequenceFlows, api="openai", model="gpt-4o-mini", temperature=0)

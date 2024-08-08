@@ -103,7 +103,7 @@ def visualize_bpmn(dot_string, file_name='bpmn_model', directory='.', file_forma
 # Example usage
 if __name__ == "__main__":
      # JSON string input
-    json_string_org = '''
+    json_string = '''
      [
         {
             "SequenceFlows": [
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     ]
     '''
 
-    json_string = '''
+    json_string_new = '''
     [
         {
             "SequenceFlows": [
