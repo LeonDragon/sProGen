@@ -1,3 +1,4 @@
 openai
 langchain_ollama
 graphviz
+google-cloud-aiplatform

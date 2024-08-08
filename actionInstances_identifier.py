@@ -70,6 +70,304 @@ Output:
     }
 ]
 
+Example 2:
+Input:
+The employee onboarding process starts when a new hire accepts a job offer. The HR department sends an offer letter and a welcome packet containing essential forms and information about the company. The new hire fills out the required forms and submits them back to HR. Meanwhile, the IT department sets up the new employee's workstation and creates necessary accounts. The process includes a loop where HR reviews the submitted forms and may request additional information if anything is missing or incorrect. Once all forms are verified, HR schedules an orientation session, and the new employee attends this session. After orientation, the new employee meets with their manager to discuss job responsibilities and expectations, concluding the onboarding process.
+
+[
+    {
+        "ModelName": "Employee Onboarding Process",
+        "Context": "Human Resources",
+        "Scope": "Starts with a new hire accepting a job offer and ends with the new employee meeting with their manager to discuss job responsibilities and expectations.",
+        "Objectives": "To ensure a smooth transition for new hires by completing necessary paperwork, setting up workstations, providing orientation, and meeting with managers.",
+        "Participants": [
+            {
+                "HR_Department": "Responsible for sending offer letters, reviewing submitted forms, requesting additional information if needed, and scheduling orientation sessions."
+            },
+            {
+                "New_Hire": "Responsible for filling out and submitting required forms, attending orientation, and meeting with their manager."
+            },
+            {
+                "IT_Department": "Responsible for setting up the new employee's workstation and creating necessary accounts."
+            },
+            {
+                "Manager": "Responsible for discussing job responsibilities and expectations with the new employee."
+            }
+        ],
+        "StartEvent": "Start_AcceptJobOffer",
+        "EndEvent": "End_MeetWithManager",
+        "ActivitiesEvents": [
+            {
+                "A_SendOfferLetterAndWelcomePacket": "The HR department sends an offer letter and a welcome packet containing essential forms and information about the company",
+                "Participant": "HR_Department"
+            },
+            {
+                "A_FillOutAndSubmitForms": "The new hire fills out the required forms and submits them back to HR",
+                "Participant": "New_Hire"
+            },
+            {
+                "A_SetupWorkstationAndCreateAccounts": "The IT department sets up the new employee's workstation and creates necessary accounts",
+                "Participant": "IT_Department"
+            },
+            {
+                "A_ReviewForms": "HR reviews the submitted forms and may request additional information if anything is missing or incorrect",
+                "Participant": "HR_Department"
+            },
+            {
+                "A_ScheduleOrientation": "Once all forms are verified, HR schedules an orientation session",
+                "Participant": "HR_Department"
+            },
+            {
+                "E_AttendOrientation": "The new employee attends the orientation session",
+                "Participant": "New_Hire"
+            },
+            {
+                "A_MeetWithManager": "The new employee meets with their manager to discuss job responsibilities and expectations",
+                "Participant": "Manager"
+            }
+        ]
+    }
+]
+
+Output:
+[
+    {
+        "ActionFlows": [
+            {"from": "Start_AcceptJobOffer", "to": "A_SendOfferLetterAndWelcomePacket"},
+            {"from": "A_SendOfferLetterAndWelcomePacket", "to": "A_FillOutAndSubmitForms"},
+            {"from": "A_FillOutAndSubmitForms", "to": "A_ReviewForms"},
+            {"from": "A_ReviewForms", "to": "A_SetupWorkstationAndCreateAccounts"},
+            {"from": "A_SetupWorkstationAndCreateAccounts", "to": "A_ScheduleOrientation"},
+            {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
+            {"from": "E_AttendOrientation", "to": "A_MeetWithManager"},
+            {"from": "A_MeetWithManager", "to": "End_MeetWithManager"}
+        ]
+    }
+]
+
+
+Example 3:
+Input:
+A customer initiates the loan application process by filling out an online application form. The system performs an initial check to ensure all required fields are completed. If any fields are missing, the system loops back, prompting the customer to provide the missing information. Once the application is complete, it is forwarded to a loan officer for review. The loan officer evaluates the application and checks the applicant's credit history. If the credit check fails, the application is rejected, and the process ends. If the credit check passes, the loan officer assesses the loan terms and may request additional documentation from the applicant. The applicant submits the required documents, and the loan officer re-evaluates the application. Once all criteria are met, the loan officer approves the loan, and the system generates a loan agreement for the customer to sign. After signing, the loan amount is disbursed to the customer, completing the process.
+
+[
+    {
+        "ModelName": "Loan Application Process",
+        "Context": "Finance",
+        "Scope": "Starts with the customer filling out an online application form and ends with the disbursement of the loan amount to the customer.",
+        "Objectives": "To process loan applications from initial submission to final disbursement, ensuring all criteria are met and required documentation is provided.",
+        "Participants": [
+            {
+                "Customer": "Responsible for filling out the application form and submitting additional documentation if requested"
+            },
+            {
+                "System": "Performs initial checks on the application form for completeness"
+            },
+            {
+                "Loan_Officer": "Responsible for reviewing the application, performing credit checks, evaluating loan terms, requesting additional documentation, and approving the loan"
+            }
+        ],
+        "StartEvent": "Start_FillOnlineApplication",
+        "EndEvent": "End_DisburseLoan",
+        "ActivitiesEvents": [
+            {
+                "A_PerformInitialCheck": "The system performs an initial check to ensure all required fields are completed",
+                "Participant": "System"
+            },
+            {
+                "A_PromptForMissingInfo": "If any fields are missing, the system loops back, prompting the customer to provide the missing information",
+                "Participant": "System"
+            },
+            {
+                "A_ForwardApplication": "Once the application is complete, it is forwarded to a loan officer for review",
+                "Participant": "System"
+            },
+            {
+                "A_ReviewApplication": "The loan officer evaluates the application and checks the applicant's credit history",
+                "Participant": "Loan_Officer"
+            },
+            {
+                "A_RejectApplication": "If the credit check fails, the application is rejected, and the process ends",
+                "Participant": "Loan_Officer"
+            },
+            {
+                "A_AssessLoanTerms": "If the credit check passes, the loan officer assesses the loan terms and may request additional documentation from the applicant",
+                "Participant": "Loan_Officer"
+            },
+            {
+                "A_SubmitDocuments": "The applicant submits the required documents",
+                "Participant": "Customer"
+            },
+            {
+                "A_ReEvaluateApplication": "The loan officer re-evaluates the application",
+                "Participant": "Loan_Officer"
+            },
+            {
+                "A_ApproveLoan": "Once all criteria are met, the loan officer approves the loan",
+                "Participant": "Loan_Officer"
+            },
+            {
+                "A_GenerateLoanAgreement": "The system generates a loan agreement for the customer to sign",
+                "Participant": "System"
+            },
+            {
+                "E_SignLoanAgreement": "After signing, the loan amount is disbursed to the customer",
+                "Participant": "Customer"
+            }
+        ]
+    }
+]
+
+Output:
+[
+    {
+        "ActionFlows": [
+            {"from": "Start_FillOnlineApplication", "to": "A_PerformInitialCheck"},
+            {"from": "A_PerformInitialCheck", "to": "A_PromptForMissingInfo"},
+            {"from": "A_PromptForMissingInfo", "to": "A_PerformInitialCheck"},
+            {"from": "A_PerformInitialCheck", "to": "A_ForwardApplication"},
+            {"from": "A_ForwardApplication", "to": "A_ReviewApplication"},
+            {"from": "A_ReviewApplication", "to": "A_RejectApplication"},
+            {"from": "A_RejectApplication", "to": "End_DisburseLoan"},
+            {"from": "A_ReviewApplication", "to": "A_AssessLoanTerms"},
+            {"from": "A_AssessLoanTerms", "to": "A_SubmitDocuments"},
+            {"from": "A_SubmitDocuments", "to": "A_ReEvaluateApplication"},
+            {"from": "A_ReEvaluateApplication", "to": "A_ApproveLoan"},
+            {"from": "A_ApproveLoan", "to": "A_GenerateLoanAgreement"},
+            {"from": "A_GenerateLoanAgreement", "to": "E_SignLoanAgreement"},
+            {"from": "E_SignLoanAgreement", "to": "End_DisburseLoan"}
+        ]
+    }
+]
+
+
+Example 4:
+Input:
+The course enrollment process begins when students log into the university's enrollment system at the start of the semester. Students select courses they wish to enroll in. If a selected course has prerequisites, the system checks if the student meets these requirements. If prerequisites are not met, the system provides alternatives or suggestions for courses that can be taken instead. Students may choose to enroll in multiple courses, making this an inclusive process. The system checks for schedule conflicts, and if any are found, it prompts the student to adjust their course selections. Once the schedule is confirmed, the system calculates tuition fees based on the selected courses. Students are then directed to the payment gateway to pay their tuition fees. After payment confirmation, the enrollment is finalized, and students receive their class schedules.
+
+[
+    {
+        "ModelName": "Course Enrollment Process",
+        "Context": "Education",
+        "Scope": "Starts with students logging into the university's enrollment system and ends with students receiving their class schedules after payment confirmation.",
+        "Objectives": "To facilitate student enrollment in courses, ensure prerequisites and schedule conflicts are addressed, and finalize enrollment upon payment.",
+        "Participants": [
+            {
+                "Students": "Responsible for selecting courses, adjusting selections based on prerequisites and schedule conflicts, and completing tuition payment."
+            },
+            {
+                "Enrollment_System": "Responsible for checking prerequisites, providing course alternatives, detecting schedule conflicts, calculating tuition fees, and confirming payment."
+            }
+        ],
+        "StartEvent": "Start_LogIntoEnrollmentSystem",
+        "EndEvent": "End_ReceiveClassSchedules",
+        "ActivitiesEvents": [
+            {"A_SelectCourses": "Students select courses they wish to enroll in", "Participant": "Students"},
+            {"A_CheckPrerequisites": "The system checks if the student meets course prerequisites", "Participant": "Enrollment_System"},
+            {"A_ProvideAlternatives": "If prerequisites are not met, the system provides alternatives or suggestions for courses", "Participant": "Enrollment_System"},
+            {"A_CheckScheduleConflicts": "The system checks for schedule conflicts", "Participant": "Enrollment_System"},
+            {"A_AdjustCourseSelections": "If any schedule conflicts are found, the system prompts the student to adjust their course selections", "Participant": "Students"},
+            {"A_CalculateTuitionFees": "The system calculates tuition fees based on the selected courses", "Participant": "Enrollment_System"},
+            {"A_DirectToPaymentGateway": "Students are directed to the payment gateway to pay their tuition fees", "Participant": "Enrollment_System"},
+            {"A_ConfirmPayment": "After payment confirmation", "Participant": "Enrollment_System"},
+            {"A_FinalizeEnrollment": "the enrollment is finalized", "Participant": "Enrollment_System"}
+        ]
+    }
+]
+
+Output:
+The course enrollment process begins when students log into the university's enrollment system at the start of the semester. Students select courses they wish to enroll in. If a selected course has prerequisites, the system checks if the student meets these requirements. If prerequisites are not met, the system provides alternatives or suggestions for courses that can be taken instead. Students may choose to enroll in multiple courses, making this an inclusive process. The system checks for schedule conflicts, and if any are found, it prompts the student to adjust their course selections. Once the schedule is confirmed, the system calculates tuition fees based on the selected courses. Students are then directed to the payment gateway to pay their tuition fees. After payment confirmation, the enrollment is finalized, and students receive their class schedules.
+
+[
+    {
+        "ModelName": "Course Enrollment Process",
+        "Context": "Education",
+        "Scope": "Starts with students logging into the university's enrollment system and ends with students receiving their class schedules after payment confirmation.",
+        "Objectives": "To facilitate student enrollment in courses, ensure prerequisites and schedule conflicts are addressed, and finalize enrollment upon payment.",
+        "Participants": [
+            {
+                "Students": "Responsible for selecting courses, adjusting selections based on prerequisites and schedule conflicts, and completing tuition payment."
+            },
+            {
+                "Enrollment_System": "Responsible for checking prerequisites, providing course alternatives, detecting schedule conflicts, calculating tuition fees, and confirming payment."
+            }
+        ],
+        "StartEvent": "Start_LogIntoEnrollmentSystem",
+        "EndEvent": "End_ReceiveClassSchedules",
+        "ActivitiesEvents": [
+            {"A_SelectCourses": "Students select courses they wish to enroll in", "Participant": "Students"},
+            {"A_CheckPrerequisites": "The system checks if the student meets course prerequisites", "Participant": "Enrollment_System"},
+            {"A_ProvideAlternatives": "If prerequisites are not met, the system provides alternatives or suggestions for courses", "Participant": "Enrollment_System"},
+            {"A_CheckScheduleConflicts": "The system checks for schedule conflicts", "Participant": "Enrollment_System"},
+            {"A_AdjustCourseSelections": "If any schedule conflicts are found, the system prompts the student to adjust their course selections", "Participant": "Students"},
+            {"A_CalculateTuitionFees": "The system calculates tuition fees based on the selected courses", "Participant": "Enrollment_System"},
+            {"A_DirectToPaymentGateway": "Students are directed to the payment gateway to pay their tuition fees", "Participant": "Enrollment_System"},
+            {"A_ConfirmPayment": "After payment confirmation", "Participant": "Enrollment_System"},
+            {"A_FinalizeEnrollment": "the enrollment is finalized", "Participant": "Enrollment_System"}
+        ]
+    }
+]
+
+Example 5:
+Input:
+The supply chain management process starts with forecasting demand based on historical sales data and market analysis. The procurement team then creates purchase orders for raw materials from suppliers. If a supplier cannot fulfill the order, the system loops back to select an alternative supplier. Once the materials are ordered, the inventory management system tracks their arrival. Upon arrival, materials are inspected for quality. If materials fail the inspection, the process loops back to request replacements from the supplier. Concurrently, the production planning team schedules manufacturing runs, considering the availability of materials and production capacity. During production, there is an inclusive behavior where different production lines can operate simultaneously to manufacture various products. Finished products are sent to the warehouse, where the system manages inventory levels and prepares shipments. The logistics team arranges transportation to distribute products to retail outlets or customers. Throughout the process, data is continuously monitored and analyzed to optimize efficiency and address any issues promptly, concluding the supply chain management process.
+
+[
+    {
+        "ModelName": "Supply Chain Management Process",
+        "Context": "Logistics",
+        "Scope": "Starts with forecasting demand and ends with distributing products to retail outlets or customers.",
+        "Objectives": "To manage the end-to-end supply chain process efficiently, ensuring timely procurement, quality inspection, production, inventory management, and distribution of products.",
+        "Participants": [
+            {"Forecasting_Team": "Responsible for forecasting demand based on historical sales data and market analysis"},
+            {"Procurement_Team": "Responsible for creating purchase orders and managing supplier relationships"},
+            {"Suppliers": "Responsible for fulfilling orders for raw materials"},
+            {"Inventory_Management_System": "Tracks the arrival and inspection of materials"},
+            {"Quality_Inspectors": "Inspect the quality of received materials"},
+            {"Production_Planning_Team": "Schedules manufacturing runs"},
+            {"Production_Lines": "Operate simultaneously to manufacture various products"},
+            {"Warehouse_Management_System": "Manages inventory levels and prepares shipments"},
+            {"Logistics_Team": "Arranges transportation for distribution"}
+        ],
+        "StartEvent": "Start_ForecastDemand",
+        "EndEvent": "End_DistributeProducts",
+        "ActivitiesEvents": [
+            {"A_ForecastDemand": "Forecasting demand based on historical sales data and market analysis", "Participant": "Forecasting_Team"},
+            {"A_CreatePurchaseOrders": "The procurement team creates purchase orders for raw materials from suppliers", "Participant": "Procurement_Team"},
+            {"A_SelectAlternativeSupplier": "If a supplier cannot fulfill the order, the system loops back to select an alternative supplier", "Participant": "Procurement_Team"},
+            {"A_TrackArrival": "The inventory management system tracks the arrival of materials", "Participant": "Inventory_Management_System"},
+            {"A_InspectMaterials": "Upon arrival, materials are inspected for quality", "Participant": "Quality_Inspectors"},
+            {"A_RequestReplacements": "If materials fail the inspection, the process loops back to request replacements from the supplier", "Participant": "Procurement_Team"},
+            {"A_ScheduleManufacturingRuns": "The production planning team schedules manufacturing runs", "Participant": "Production_Planning_Team"},
+            {"A_ManufactureProducts": "Different production lines operate simultaneously to manufacture various products", "Participant": "Production_Lines"},
+            {"A_ManageInventory": "Finished products are sent to the warehouse, where the system manages inventory levels and prepares shipments", "Participant": "Warehouse_Management_System"},
+            {"A_ArrangeTransportation": "The logistics team arranges transportation to distribute products to retail outlets or customers", "Participant": "Logistics_Team"},
+            {"A_MonitorAndAnalyzeData": "Throughout the process, data is continuously monitored and analyzed to optimize efficiency and address any issues promptly", "Participant": "Forecasting_Team"}
+        ]
+    }
+]
+
+Output:
+[
+    {
+        "ActionFlows": [
+            {"from": "Start_ForecastDemand", "to": "A_ForecastDemand"},
+            {"from": "A_ForecastDemand", "to": "A_CreatePurchaseOrders"},
+            {"from": "A_CreatePurchaseOrders", "to": "A_SelectAlternativeSupplier"},
+            {"from": "A_SelectAlternativeSupplier", "to": "A_TrackArrival"},
+            {"from": "A_TrackArrival", "to": "A_InspectMaterials"},
+            {"from": "A_InspectMaterials", "to": "A_RequestReplacements"},
+            {"from": "A_RequestReplacements", "to": "A_SelectAlternativeSupplier"},
+            {"from": "A_InspectMaterials", "to": "A_ScheduleManufacturingRuns"},
+            {"from": "A_ScheduleManufacturingRuns", "to": "A_ManufactureProducts"},
+            {"from": "A_ManufactureProducts", "to": "A_ManageInventory"},
+            {"from": "A_ManageInventory", "to": "A_ArrangeTransportation"},
+            {"from": "A_ArrangeTransportation", "to": "End_DistributeProducts"}
+        ]
+    }
+]
+
+
 
 """
 
