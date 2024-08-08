@@ -25,7 +25,7 @@ Instructions:
 - Examine Feedback Mechanisms: Check for feedback loops where the output or result of a process step is evaluated, and based on the evaluation, the process may loop back to an earlier step for rework or further action.
 - Identify Loop Control Conditions: Understand the conditions under which the loop continues and the conditions under which the loop terminates. This helps to accurately model the loop in BPMN.
     - Textual Clues: Conditions or criteria for repetition, such as "until approved", "while not complete", or "as long as".
-- DO NOT output additional text except the JSON format. Do not output ```json or ```
+- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
 
 
 
@@ -66,6 +66,16 @@ The employee onboarding process begins when a new hire submits their completed p
                 "name": "XOR_ReviewDocuments",
                 "type": "XOR",
                 "classification": "split",
+                "conditions": [
+                    {
+                        "condition": "If any documents are missing or incorrect, return to new hire for correction",
+                        "to_node": "A_ReturnForCorrection"
+                    },
+                    {
+                        "condition": "If all documents are complete and correct, schedule orientation",
+                        "to_node": "A_ScheduleOrientation"
+                    }
+                ],
                 "from_node": ["A_ReviewDocuments"],
                 "to_nodes": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "reason": "If any documents are missing or incorrect, they are returned to the new hire for correction. Otherwise, the new hire is scheduled for orientation."
@@ -75,9 +85,15 @@ The employee onboarding process begins when a new hire submits their completed p
                 "name": "XOR_OnboardingComplete",
                 "type": "XOR",
                 "classification": "join",
+                "conditions": [
+                    {
+                        "condition": "All necessary steps are completed, assign to department",
+                        "to_node": "A_AssignToDepartment"
+                    }
+                ],
                 "from_node": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "to_nodes": ["A_AssignToDepartment"],
-                "reason": "After attending the orientation, the new hire is assigned to their department."
+                "reason": "After attending the orientation and completing all necessary steps, the new hire is assigned to their department."
             }
         ]
     }

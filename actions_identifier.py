@@ -10,7 +10,7 @@ SYSTEM_MESSAGE_TEMPLATE = """
 You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
 
 Task:
-Analyze the following textual description of a business process within the delimiters {delimiter} and identify distinct activities. Ensure that each activity is unique and avoid listing any duplicate activities or events that may occur due to loops within the process. Provide a clear and concise list of these activities, explicitly handling any repetitive actions due to loops without duplicating them. Output a Python list of JSON objects with keys: StartEvent, EndEvent, Activities, and Participants. Ensure the output is strictly in JSON format without any additional text.
+Analyze the following textual description of a business process within the delimiters {####} and identify distinct activities. Ensure that each activity is unique and avoid listing any duplicate activities or events that may occur due to loops within the process. Provide a clear and concise list of these activities, explicitly handling any repetitive actions due to loops without duplicating them. Output a Python list of JSON objects with keys: StartEvent, EndEvent, Activities, and Participants. Ensure the output is strictly in JSON format without any additional text.
 
 Instructions:
 - Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details.
@@ -23,7 +23,7 @@ Instructions:
 - Identify Activities/Events: Identify specific actions or tasks described in the text and event usually in verb forms, assigning a variable to each (e.g., A_RecieveOrder, A_CheckCredit, E_RecieveEmail) (note that A for activities or tasks, E for Events). List of distinct activities without any redundancy.
     - Textual Clues: These are the core actions that drive the process forward. Look for verbs or action phrases like "register", "investigate", "prepare", "review", "approve", "admit", "examine", "process", "schedule", or "conduct".
 - Identify Participants: Identify the single participant involved in each activity or event and include them in the output.
-- DO NOT output additional text except the JSON format. Do not output ```json or ```
+- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
 
 Examples:
 

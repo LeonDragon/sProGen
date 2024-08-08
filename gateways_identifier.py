@@ -80,7 +80,7 @@ Instructions:
 - Using the list of provided "ActivitiesEvent", identify gateways along with textual clues that led to the decision. 
 - Identify as many gateways as you can, whether they are for divergence (such as XOR-split, OR-split, or AND-split) or convergence (such as XOR-join, OR-join, or AND-join). Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case; several split gateways could converge into a single join gateway.
 - Output a Python list of JSON objects, detailing the gateways identified in Step 1. Ensure the output is strictly in JSON format without any additional text. Do not print out Step 1.
-- DO NOT output additional text except the JSON format. Do not output ```json or ```
+- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
 
 JSON Object Structure
 - total_gateways: Total number of gateways identified. total_gateways = total_XOR_split + total_XOR_join + total_AND_split + total_AND_join + total_OR_split + total_OR_join

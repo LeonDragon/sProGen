@@ -2,26 +2,28 @@
 <html>
 <head>
     <title>Business Process Model Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .container {
+            max-width: 900px;
         }
 
         #svg-container {
             margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
+            border: 1px solid #dee2e6;
             width: 100%;
-            max-width: 800px;
             height: 0;
             padding-bottom: 75%; /* Maintain aspect ratio (4:3) */
-            overflow: hidden; /* Ensure content does not overflow */
             position: relative;
+            background-color: #ffffff;
         }
 
         #svg-object {
@@ -34,33 +36,84 @@
 
         #controls {
             margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
         }
 
         .control-button {
             padding: 10px;
             font-size: 16px;
-            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #loading-spinner {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #007bff;
         }
     </style>
 </head>
 <body>
-    <h1>Business Process Model Generator</h1>
-    <form id="process-form">
-        <textarea name="description" id="description" rows="10" cols="50" placeholder="Enter process description..."></textarea><br>
-        <button type="submit">Generate Model</button>
-    </form>
-    <!-- Controls for zooming and panning -->
-    <div id="controls">
-        <button id="zoom-in" class="control-button">Zoom In</button>
-        <button id="zoom-out" class="control-button">Zoom Out</button>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">BPM Generator</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container mt-5">
+        <div class="text-center">
+            <h1 class="mb-4">Business Process Model Generator</h1>
+            <form id="process-form" class="mb-4">
+                <div class="form-group">
+                    <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter process description..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Generate Model</button>
+            </form>
+            <!-- Controls for zooming and panning -->
+            <div id="controls" class="d-flex justify-content-center">
+                <button id="zoom-in" class="btn btn-secondary control-button mr-2">Zoom In</button>
+                <button id="zoom-out" class="btn btn-secondary control-button">Zoom Out</button>
+            </div>
+            <!-- Container to display the SVG -->
+            <div id="svg-container">
+                <div id="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <object id="svg-object" type="image/svg+xml" data="">Your browser does not support SVG</object>
+            </div>
+        </div>
     </div>
-    <!-- Container to display the SVG -->
-    <div id="svg-container">
-        <object id="svg-object" type="image/svg+xml" data="">Your browser does not support SVG</object>
-    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Font Awesome JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 
     <script>
         // Ensure DOM is fully loaded
@@ -68,6 +121,7 @@
             var form = document.getElementById('process-form');
             var svgObject = document.getElementById('svg-object');
             var svgContainer = document.getElementById('svg-container');
+            var loadingSpinner = document.getElementById('loading-spinner');
             var zoomLevel = 1;
             var panX = 0;
             var panY = 0;
@@ -77,6 +131,7 @@
             form.onsubmit = function(event) {
                 event.preventDefault();  // Stop the form from causing a page load
                 var description = document.getElementById('description').value;
+                loadingSpinner.style.display = 'block'; // Show the loading spinner
                 fetch('/process', {
                     method: 'POST',
                     headers: {
@@ -87,8 +142,12 @@
                 .then(response => response.json())
                 .then(data => {
                     svgObject.setAttribute('data', data.svg_url);
+                    loadingSpinner.style.display = 'none'; // Hide the loading spinner
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingSpinner.style.display = 'none'; // Hide the loading spinner on error
+                });
             };
 
             document.getElementById('zoom-in').addEventListener('click', function() {

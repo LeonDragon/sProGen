@@ -103,7 +103,7 @@ def visualize_bpmn(dot_string, file_name='bpmn_model', directory='.', file_forma
 # Example usage
 if __name__ == "__main__":
      # JSON string input
-    json_string = '''
+    json_string_org = '''
      [
         {
             "SequenceFlows": [
@@ -120,21 +120,20 @@ if __name__ == "__main__":
     ]
     '''
 
-    json_string_new = '''
+    json_string = '''
     [
         {
             "SequenceFlows": [
-                {"from": "Start_ReceiveInquiry", "to": "XOR_RegisterInquiry"},
-                {"from": "XOR_RegisterInquiry", "to": "A_RegisterInquiry"},
-                {"from": "XOR_RegisterInquiry", "to": "A_InvestigateInquiry"},
-                {"from": "A_RegisterInquiry", "to": "A_InvestigateInquiry"},
-                {"from": "A_InvestigateInquiry", "to": "A_PrepareResponse"},
-                {"from": "A_PrepareResponse", "to": "E_ReviewResponse"},
-                {"from": "E_ReviewResponse", "to": "XOR_ApproveResponse"},
-                {"from": "XOR_ApproveResponse", "to": "End_ApproveResponse", "condition": "if approved"},
-                {"from": "A_PrepareForRevision", "to": "A_InvestigateInquiry"},
-                {"from": "A_PrepareForRevision", "to": "E_ReviewResponse"},
-                {"from": "XOR_ApproveResponse", "to": "A_PrepareForRevision", "condition": "if not approved"}
+                {"from": "Start_RegisterInquiry", "to": "A_RegisterInquiry"},     
+                {"from": "A_RegisterInquiry", "to": "A_InvestigateInquiry"},      
+                {"from": "A_InvestigateInquiry", "to": "A_PrepareResponse"},      
+                {"from": "A_PrepareResponse", "to": "A_ReviewResponse"},
+                {"from": "A_ReviewResponse", "to": "XOR_ReviewResponseApproval"}, 
+                {"from": "XOR_ReviewResponseApproval", "to": "A_RePrepareResponse", "condition": "if the registrar does not approve the response"},
+                {"from": "XOR_ReviewResponseApproval", "to": "End_ApproveResponse", "condition": "if the registrar approves the response"},
+                {"from": "A_RePrepareResponse", "to": "A_ReviewResponse"},        
+                {"from": "A_ReviewResponse", "to": "XOR_ResponseFinalization"},   
+                {"from": "XOR_ResponseFinalization", "to": "End_ApproveResponse"} 
             ]
         }
     ]

@@ -17,7 +17,7 @@ Instructions:
 - Using the list of provided "ActivitiesEvent" and list of provided "Gateways", and list of provided "Loops" (if any), define the sequence flows.
 - Establish the order of activities, events, and gateways, detailing the sequence flow with variables.
 - Clearly distinguish between the types of gateways and represent the conditional (XOR, OR) and parallel (AND) flows accurately.
-- DO NOT output additional text except the JSON format. Do not output ```json or ```
+- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
 
 
 Examples:
@@ -44,12 +44,29 @@ The employee onboarding process begins when a new hire submits their completed p
             {"E_AttendOrientation": "After attending the orientation"},
             {"A_AssignToDepartment": "the new hire is assigned to their department"}
         ],
+        "total_gateways": 2,
+        "total_XOR_split": 1,
+        "total_XOR_join": 1,
+        "total_AND_split": 0,
+        "total_AND_join": 0,
+        "total_OR_split": 0,
+        "total_OR_join": 0,
         "Gateways": [
             {
                 "id": "G1",
                 "name": "XOR_ReviewDocuments",
                 "type": "XOR",
                 "classification": "split",
+                "conditions": [
+                    {
+                        "condition": "If any documents are missing or incorrect, return to new hire for correction",
+                        "to_node": "A_ReturnForCorrection"
+                    },
+                    {
+                        "condition": "If all documents are complete and correct, schedule orientation",
+                        "to_node": "A_ScheduleOrientation"
+                    }
+                ],
                 "from_node": ["A_ReviewDocuments"],
                 "to_nodes": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "reason": "If any documents are missing or incorrect, they are returned to the new hire for correction. Otherwise, the new hire is scheduled for orientation."
@@ -59,9 +76,15 @@ The employee onboarding process begins when a new hire submits their completed p
                 "name": "XOR_OnboardingComplete",
                 "type": "XOR",
                 "classification": "join",
+                "conditions": [
+                    {
+                        "condition": "All necessary steps are completed, assign to department",
+                        "to_node": "A_AssignToDepartment"
+                    }
+                ],
                 "from_node": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "to_nodes": ["A_AssignToDepartment"],
-                "reason": "After attending the orientation, the new hire is assigned to their department."
+                "reason": "After attending the orientation and completing all necessary steps, the new hire is assigned to their department."
             }
         ],
         "Loops": [

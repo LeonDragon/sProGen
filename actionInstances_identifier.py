@@ -17,7 +17,7 @@ TASK: Given the process description and the list of Activities/Events (also call
 Instructions:
 - Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details.
 - Identify Nodes: Using the list of provided "Activities/Events," identify the sequence of actions and their flow in the process.
-- Determine Flow: Establish the flow between identified nodes, such as flow_1, flow_2, etc., ensuring each transition is clear and follows the logical sequence of the business process.
+- Determine Flow: Establish the flow between identified nodes, ensuring each transition is clear and follows the logical sequence of the business process.
 - Construct JSON Objects: For each flow, create a JSON object that includes the list of nodes in the flow, in the correct sequence.
 - Output Format: Output a Python list of JSON objects detailing the flows identified in the previous steps. Ensure the output is strictly in JSON format without any additional text.
 

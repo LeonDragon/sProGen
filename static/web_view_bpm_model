@@ -12,11 +12,12 @@ digraph BPMN {
         penwidth=1, 
         fontcolor=black
     ];
-    A_ReviewResponse [label="ReviewResponse"];
-    A_RePrepareResponse [label="RePrepareResponse"];
-    A_InvestigateInquiry [label="InvestigateInquiry"];
-    A_PrepareResponse [label="PrepareResponse"];
     A_RegisterInquiry [label="RegisterInquiry"];
+    A_ApproveResponse [label="ApproveResponse"];
+    A_PrepareResponse [label="PrepareResponse"];
+    A_ReviewResponse [label="ReviewResponse"];
+    A_PrepareResponseAgain [label="PrepareResponseAgain"];
+    A_InvestigateInquiry [label="InvestigateInquiry"];
 
     node [
         shape=diamond, 
@@ -25,16 +26,16 @@ digraph BPMN {
         color=black, 
         penwidth=1
     ];
-    XOR_ResponseFinalization [label="XOR"];
-    XOR_ReviewResponseApproval [label="XOR"];
+    XOR_ReviewResponse [label="XOR"];
+    XOR_FinalizeResponse [label="XOR"];
     Start_RegisterInquiry -> A_RegisterInquiry;
     A_RegisterInquiry -> A_InvestigateInquiry;
     A_InvestigateInquiry -> A_PrepareResponse;
     A_PrepareResponse -> A_ReviewResponse;
-    A_ReviewResponse -> XOR_ReviewResponseApproval;
-    XOR_ReviewResponseApproval -> A_RePrepareResponse [label="if the registrar does not approve the response"];
-    XOR_ReviewResponseApproval -> End_ApproveResponse [label="if the registrar approves the response"];
-    A_RePrepareResponse -> A_ReviewResponse;
-    A_ReviewResponse -> XOR_ResponseFinalization;
-    XOR_ResponseFinalization -> End_ApproveResponse;
+    A_ReviewResponse -> XOR_ReviewResponse;
+    XOR_ReviewResponse -> A_PrepareResponseAgain [label="if response is not approved"];
+    XOR_ReviewResponse -> A_ApproveResponse [label="if response is approved"];
+    A_PrepareResponseAgain -> A_ReviewResponse;
+    A_ApproveResponse -> XOR_FinalizeResponse;
+    XOR_FinalizeResponse -> End_ApproveResponse;
 }
