@@ -100,37 +100,6 @@ JSON Object Structure
     -- to_nodes: Node(s) following the gateway.
     -- reason: This is a description explaining (clues) why you can make that inference.
 
-    
-
-Examples:
-
-Example 1:
-Input:
-
-Output:
-
-Example 2:
-Input:
-
-Output:
-
-Example 3:
-Input:
-
-Output:
-
-Example 4:
-Input:
-
-Output:
-
-Example 5:
-Input:
-
-Output:
-
-
-=====================================================
 Examples:
 
 Input:
@@ -208,6 +177,37 @@ Output:
 ]
 
 """
+
+# Examples:
+
+# Example 1:
+# Input:
+
+# Output:
+
+# Example 2:
+# Input:
+
+# Output:
+
+# Example 3:
+# Input:
+
+# Output:
+
+# Example 4:
+# Input:
+
+# Output:
+
+# Example 5:
+# Input:
+
+# Output:
+
+
+
+
 # Final Notes
 # - Generally, if a process has a split gateway (e.g., XOR-split, OR-split, or AND-split), it will be followed by a corresponding join gateway (e.g., XOR-join, OR-join, or AND-join) to converge the paths. However, this is not always the case, as some processes may diverge without needing an explicit convergence.
 # - Ensure the output is strictly in JSON format without any additional text.

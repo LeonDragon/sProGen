@@ -67,33 +67,36 @@ def pipeline(process_description):
     total_start_time = time.time()
     total_prompt_tokens = 0
     total_completion_tokens = 0
+    delay_time = 65
 
     previous_json_result=""
 
     # Step 1: Preprocessing to improve the textual description
     print("Step 1: Preprocessing to improve the textual description")
-    preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="ollama", model="phi3", temperature=0.0)
+    preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     #print(preprocess_result)
     new_process_description = json.loads(preprocess_result)[0]["Original"] #Original or Augmented
     print(" ===> DONE \n")
-    #print(new_process_description)
+    print(new_process_description)
+    time.sleep(delay_time) # For vertex AI Llama3.1 405b
     
     # Step 2: Context understanding to identify context and objectives
     print("Step 2: Context understanding to identify context and objectives")
-    context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="ollama", model="phi3", temperature=0.0)
+    context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     previous_json_result = context_json_result
     combined_prompt = combine_results("", context_json_result, new_process_description)
-    print(context_json_result)
+    print(previous_json_result)
     print(" ===> DONE \n")
     #print(combined_prompt)
+    time.sleep(delay_time) # For vertex AI Llama3.1 405b
     
     # Step 3: Identifying actions
     print("Step 3: Identifying actions") 
-    actions_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="ollama", model="llama3.1", temperature=0.0)
+    actions_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     previous_json_result = combine_results(previous_json_result, actions_json_result)
@@ -101,10 +104,11 @@ def pipeline(process_description):
     print(actions_json_result)
     print(" ===> DONE \n")
     #print(combined_prompt)
+    time.sleep(delay_time) # For vertex AI Llama3.1 405b
     
     # Step 4: Identifying gateways
     print("Step 4: Identifying gateways")
-    gateways_json_result, prompt_tokens, completion_tokens = gateways_identify_from_message(combined_prompt, api="ollama", model="llama3.1", temperature=0.0)
+    gateways_json_result, prompt_tokens, completion_tokens = gateways_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     previous_json_result = combine_results(previous_json_result, gateways_json_result)
@@ -113,10 +117,11 @@ def pipeline(process_description):
     print(" ===> DONE \n")
     #print(gateways_json_result)
     #print(combined_prompt)
+    time.sleep(delay_time) # For vertex AI Llama3.1 405b
     
     # Step 5: Identifying loops
     print("Step 5: Identifying loops")
-    loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="ollama", model="llama3.1", temperature=0.0)
+    loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     previous_json_result = combine_results(previous_json_result, loops_json_result)
@@ -124,10 +129,11 @@ def pipeline(process_description):
     print(loops_json_result)
     print(" ===> DONE \n")
     #print(combined_prompt)
+    time.sleep(delay_time) # For vertex AI Llama3.1 405b
     
     # Step 6: Identifying sequence flows
     print("Step 6: Identifying sequence flows")
-    sequence_flow_result, prompt_tokens, completion_tokens = sequenceFlow_identify_from_message(combined_prompt, api="ollama", model="llama3.1", temperature=0.7)
+    sequence_flow_result, prompt_tokens, completion_tokens = sequenceFlow_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.7)
     total_prompt_tokens += prompt_tokens
     total_completion_tokens += completion_tokens
     previous_json_result = combine_results(previous_json_result, sequence_flow_result)

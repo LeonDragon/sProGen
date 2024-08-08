@@ -18,6 +18,7 @@ Instructions:
 - Clarify Scope: Determine the boundaries of the process (start and end points).
 - Set Objectives: Understand the purpose of the process and its desired outcomes.
 - Identify Participants and Roles: Identify different Participants and Roles involved in the process. These are typically represented as pools or lanes in BPMN. Textual Clues: Look for specific roles or departments mentioned, such as "cabinet officer", "principal registrar", "customer service", or "logistics team".
+- DO NOT output additional text except the JSON format. Do not output ```json or ``` or \n
 
 Examples:
 
