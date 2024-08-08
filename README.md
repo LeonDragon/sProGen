@@ -28,28 +28,72 @@
     pip install -r requirements.txt
     ```
 
-5. **Run your project**:
+5. **(Optional) Set up Google Cloud Authentication**:
+   
+    - Install the Google Cloud client library:
+      ```sh
+      pip install --upgrade google-cloud-aiplatform
+      ```
+
+    - Ensure you have the Google Cloud SDK installed. If not, you can download and install it from [here](https://cloud.google.com/sdk/docs/install).
+
+    - Authenticate with Google Cloud:
+      ```sh
+      gcloud auth login
+      ```
+
+    - Set your Google Cloud project ID:
+      ```sh
+      gcloud config set project YOUR_PROJECT_ID
+      ```
+      Replace `YOUR_PROJECT_ID` with your actual Google Cloud project ID.
+
+    - Create a service account and download its JSON key file. Follow these steps:
+      1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+      2. Navigate to "IAM & Admin" > "Service Accounts".
+      3. Click "Create Service Account".
+      4. Provide a name and description for the service account and click "Create".
+      5. Assign the necessary roles (e.g., "Vertex AI Admin") and click "Continue".
+      6. Click "Done", then "Manage keys" for the service account.
+      7. Click "Add Key" > "Create new key" and choose "JSON". Download the key file.
+
+    - Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to the downloaded JSON key file:
+      - On Windows:
+        ```sh
+        set GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\your\service-account-file.json"
+        ```
+      - On macOS/Linux:
+        ```sh
+        export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service-account-file.json"
+        ```
+      Make sure to replace `/path/to/your/service-account-file.json` with the actual path to your service account key file.
+
+6. **Run your project**:
     ```sh
     python Sample.py
     ```
 
-### 2. Create a Setup Script
+## Using Llama 3.1 in Vertex AI
 
-You can create a simple setup script to automate the creation of the virtual environment and installation of dependencies. Here’s an example `setup.sh` script:
+Here is an example of how to use the Llama 3.1 model in Vertex AI:
 
-```sh
-#!/bin/bash
+```python
+import os
+from google.cloud import aiplatform
+from vertexai.preview.language_models import TextGenerationModel
 
-# Check if virtual environment directory exists
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python -m venv venv
-fi
+# Set the GOOGLE_APPLICATION_CREDENTIALS environment variable
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/path/to/your/service-account-file.json"
 
-# Activate the virtual environment
-source venv/bin/activate
+# Initialize the Vertex AI client
+aiplatform.init(project='your-project-id', location='us-central1')
 
-# Install dependencies
-pip install -r requirements.txt
+# Load the Llama 3.1 405B Instruct model from Vertex AI Model Garden
+model = TextGenerationModel.from_pretrained("llama3-405b-instruct-maas")
 
-echo "Setup complete. Virtual environment created and dependencies installed."
+# Define your prompt
+prompt = "Write a short story about a cat who goes on an adventure."
+
+# Generate text using the model
+response = model.predict(prompt)
+print('Generated text:', response)
