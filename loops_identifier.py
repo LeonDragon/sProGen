@@ -14,7 +14,7 @@ Understand the textual description, identify context, and overall process goal o
 
 Instructions:
 - Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details. Try to identify loops.
-- Using the list of provided "ActivitiesEvent" and list of provided "Gateways", identify loops.
+- Using the list of provided "ActivitiesEvent", list of provided "Gateways", and list of provided "ActionFlows", identify loops.
 - Identify Loops: Look for any repeated actions or instructions that indicate a task or set of tasks is performed more than once under certain conditions.
 - Read the Process Description Thoroughly: Look for any repeated actions or instructions that indicate a task or set of tasks is performed more than once under certain conditions.
 - Identify Key Phrases and Conditions: Phrases like "if not approved, then...", "repeat until...", "loop back to...", "revisit...", or "perform again" are indicators of loops or cycles in the process.
@@ -53,13 +53,15 @@ The employee onboarding process begins when a new hire submits their completed p
             {"E_AttendOrientation": "After attending the orientation"},
             {"A_AssignToDepartment": "the new hire is assigned to their department"}
         ],
-        "total_gateways": 2,
-        "total_XOR_split": 1,
-        "total_XOR_join": 1,
-        "total_AND_split": 0,
-        "total_AND_join": 0,
-        "total_OR_split": 0,
-        "total_OR_join": 0,
+        "ActionFlows": [
+            {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
+            {"from": "A_ReviewDocuments", "to": "A_ReturnForCorrection"},
+            {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
+            {"from": "A_ReviewDocuments", "to": "A_ScheduleOrientation"},
+            {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
+            {"from": "E_AttendOrientation", "to": "A_AssignToDepartment"},
+            {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
+        ],
         "Gateways": [
             {
                 "id": "G1",
@@ -69,15 +71,15 @@ The employee onboarding process begins when a new hire submits their completed p
                 "conditions": [
                     {
                         "condition": "If any documents are missing or incorrect, return to new hire for correction",
-                        "to_node": "A_ReturnForCorrection"
+                        "to": "A_ReturnForCorrection"
                     },
                     {
                         "condition": "If all documents are complete and correct, schedule orientation",
-                        "to_node": "A_ScheduleOrientation"
+                        "to": "A_ScheduleOrientation"
                     }
                 ],
-                "from_node": ["A_ReviewDocuments"],
-                "to_nodes": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
+                "from": ["A_ReviewDocuments"],
+                "to": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "reason": "If any documents are missing or incorrect, they are returned to the new hire for correction. Otherwise, the new hire is scheduled for orientation."
             },
             {
@@ -91,8 +93,8 @@ The employee onboarding process begins when a new hire submits their completed p
                         "to_node": "A_AssignToDepartment"
                     }
                 ],
-                "from_node": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
-                "to_nodes": ["A_AssignToDepartment"],
+                "from": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
+                "to": ["A_AssignToDepartment"],
                 "reason": "After attending the orientation and completing all necessary steps, the new hire is assigned to their department."
             }
         ]

@@ -5,6 +5,7 @@ import time
 from input_preprocess import identify_from_message as preprocess_identify_from_message
 from context_understanding import identify_from_message as context_identify_from_message
 from actions_identifier import identify_from_message as actions_identify_from_message
+from actionInstances_identifier import identify_from_message as actionInstances_identify_from_message # Action Instance
 from gateways_identifier import identify_from_message as gateways_identify_from_message
 from loops_identifier import identify_from_message as loops_identify_from_message
 from sequenceFlows_identifier import identify_from_message as sequenceFlow_identify_from_message
@@ -78,6 +79,10 @@ def calculate_cost(prompt_tokens, completion_tokens, price_per_1m_prompt_tokens,
         "total_cost": total_cost
     }
 
+def update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens):
+    total_prompt_tokens += prompt_tokens
+    total_completion_tokens += completion_tokens
+    return total_prompt_tokens, total_completion_tokens
 
 def pipeline(process_description):
     """
@@ -98,8 +103,7 @@ def pipeline(process_description):
     print("Step 1: Preprocessing to improve the textual description", end=' ', flush=True)
     #preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="ollama", model="phi3", temperature=0.0)
-    total_prompt_tokens += prompt_tokens
-    total_completion_tokens += completion_tokens
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     #print(preprocess_result)
     new_process_description = json.loads(preprocess_result)[0]["Original"] #Original or Augmented
     print(" ===> DONE \n")
@@ -110,8 +114,7 @@ def pipeline(process_description):
     print("Step 2: Context understanding to identify context and objectives", end=' ', flush=True)
     #context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="ollama", model="phi3", temperature=0.7)
-    total_prompt_tokens += prompt_tokens
-    total_completion_tokens += completion_tokens
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     previous_json_result = context_json_result
     combined_prompt = combine_results("", context_json_result, new_process_description)
     print(" ===> DONE \n")
@@ -124,12 +127,24 @@ def pipeline(process_description):
     #actions_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     #actions_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="ollama", model="phi3", temperature=0.0)
     actions_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="openai", model="gpt-4o-mini", temperature=0.7)
-    total_prompt_tokens += prompt_tokens
-    total_completion_tokens += completion_tokens
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     previous_json_result = combine_results(previous_json_result, actions_json_result)
     combined_prompt = combine_results(previous_json_result, actions_json_result, new_process_description)
     print(" ===> DONE \n")
     print(actions_json_result)
+    #print(combined_prompt)
+    time.sleep(delay_time) # For vertex AI Llama3.1 405b
+
+    # Step 3-1: Identifying Action Instance (Ordering relation between activities and events) actionInstance_identify_from_message
+    print("Step 3-1: Identifying action instances", end=' ', flush=True) 
+    #actionsInstance_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
+    #actions_json_result, prompt_tokens, completion_tokens = actions_identify_from_message(combined_prompt, api="ollama", model="phi3", temperature=0.0)
+    actionsInstances_json_result, prompt_tokens, completion_tokens = actionInstances_identify_from_message(combined_prompt, api="openai", model="gpt-4o-mini", temperature=0.7)
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
+    previous_json_result = combine_results(previous_json_result, actionsInstances_json_result)
+    combined_prompt = combine_results(previous_json_result, actionsInstances_json_result, new_process_description)
+    print(" ===> DONE \n")
+    print(actionsInstances_json_result)
     #print(combined_prompt)
     time.sleep(delay_time) # For vertex AI Llama3.1 405b
     
@@ -138,8 +153,7 @@ def pipeline(process_description):
     #gateways_json_result, prompt_tokens, completion_tokens = gateways_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     #gateways_json_result, prompt_tokens, completion_tokens = gateways_identify_from_message(combined_prompt, api="ollama", model="phi3", temperature=0.0)
     gateways_json_result, prompt_tokens, completion_tokens = gateways_identify_from_message(combined_prompt, api="openai", model="gpt-4o-mini", temperature=0.7)
-    total_prompt_tokens += prompt_tokens
-    total_completion_tokens += completion_tokens
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     previous_json_result = combine_results(previous_json_result, gateways_json_result)
     combined_prompt = combine_results(previous_json_result, gateways_json_result, new_process_description)
     print(" ===> DONE \n") 
@@ -154,8 +168,7 @@ def pipeline(process_description):
     #loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     #loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="ollama", model="phi3", temperature=0.0)
     loops_json_result, prompt_tokens, completion_tokens = loops_identify_from_message(combined_prompt, api="openai", model="gpt-4o-mini", temperature=0.7)
-    total_prompt_tokens += prompt_tokens
-    total_completion_tokens += completion_tokens
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     previous_json_result = combine_results(previous_json_result, loops_json_result)
     combined_prompt = combine_results(previous_json_result, loops_json_result, new_process_description)
     print(" ===> DONE \n")
@@ -168,8 +181,7 @@ def pipeline(process_description):
     #sequence_flow_result, prompt_tokens, completion_tokens = sequenceFlow_identify_from_message(combined_prompt, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.7)
     #sequence_flow_result, prompt_tokens, completion_tokens = sequenceFlow_identify_from_message(combined_prompt, api="ollama", model="phi3", temperature=0.7)
     sequence_flow_result, prompt_tokens, completion_tokens = sequenceFlow_identify_from_message(combined_prompt, api="openai", model="gpt-4o-mini", temperature=0.7)
-    total_prompt_tokens += prompt_tokens
-    total_completion_tokens += completion_tokens
+    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     previous_json_result = combine_results(previous_json_result, sequence_flow_result)
     combined_prompt = combine_results(previous_json_result, sequence_flow_result, new_process_description)
     print(" ===> DONE \n")

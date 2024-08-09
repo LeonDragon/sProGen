@@ -10,14 +10,37 @@ SYSTEM_MESSAGE_TEMPLATE = """
 You are an expert in business process modeling, specializing in Business Process Management (BPM) and Business Process Model and Notation (BPMN 2.0.2).
 
 Task:
-Understand the textual description, identify context, and overall process goal of textual descriptions of BPMN process models within the delimiters {delimiter}. Output a Python list of JSON objects with keys: SequenceFlows. Ensure the output is strictly in JSON format without any additional text.
+Understand the textual description, identify context, and overall process goal of textual descriptions of BPMN process models within the delimiters {delimiter}. Output a Python list of JSON objects with keys: SequenceFlows. Each object must include "from" and "to" keys that strictly follow the naming format: {"from": "Start_<ActivityName>", "to": "A_<ActivityName>"}, {"from": "E_<EventName>", "to": "OR_<GatewayName>"}, where:Start: Indicates the start of a sequence. A: Represents activities. XOR/OR/AND: Represents conditional or parallel gateways. E: Represents events. End: Indicates the end of a sequence.
 
 Instructions:
-- Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details. Try to identify or infer the sequence flows of (events, activities, or gateways).
-- Using the list of provided "ActivitiesEvent" and list of provided "Gateways", and list of provided "Loops" (if any), define the sequence flows.
-- Establish the order of activities, events, and gateways, detailing the sequence flow with variables.
-- Clearly distinguish between the types of gateways and represent the conditional (XOR, OR) and parallel (AND) flows accurately.
-- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
+1. Read Thoroughly: Carefully read the textual description of the business process to grasp the overall objective, scope, and details. Try to identify or infer the sequence flows of (events, activities, or gateways).
+2. Using the list of provided "ActivitiesEvent," list of provided "Gateways", list of provided "Loops" (if any), and list of provided "ActionFlows", define the sequence flows ("SequenceFlows"). Ensure that each element is correctly categorized. Remember that the "SequenceFlows" are the extended version of "ActionFlows" with "gateways".
+3. Establish Sequence Flows: Establish the order of activities, events, and gateways, detailing the sequence flow with variables. Ensure the sequence logically follows the process goals identified in Step 1. Strictly follow the "from" and "to" of each gateways to correctly identify the sequence flow.
+4. Distinguish Gateways: Clearly distinguish between the types of gateways and represent the conditional (XOR, OR) and parallel (AND) flows accurately. Double-check that the gateways are correctly categorized and represent the process logic before moving to the validation steps.
+5. Validation with Negative Prompts:
+    - Check the final results against the "Negative Prompts."
+    - If errors are detected, identify the specific part of the sequence flow where the error occurred, correct it based on the provided instructions, and then revalidate that part before continuing.
+    - If no errors are found, proceed to Step 6.
+6. Validation with BPMN-Specific Negative Prompts:
+    - Check the final results against the "BPMN-Specific Negative Prompts."
+    - If errors are detected, identify the specific part of the sequence flow where the error occurred, correct it based on the provided instructions, and then revalidate that part before continuing.
+    - If no errors are found, produce the output.
+
+Negative Prompts:
+- No Additional Text: DO NOT include any additional text or metadata in the output, such as code comments, explanations, or formatting markers (e.g., ```json, ```, #, //).
+- No Non-JSON Data: DO NOT output any non-JSON data, such as headers, footers, or any descriptive text that is not part of the JSON structure.
+- No Empty or Null Values: DO NOT include empty or null values in the JSON output unless they are explicitly required by the context of the sequence flow.
+- No Inconsistent Formatting: DO NOT use inconsistent formatting in the JSON structure, such as unnecessary white spaces, line breaks, or indentation that does not adhere to standard JSON formatting practices.
+- No Incorrect Keys or Fields: DO NOT use incorrect or additional keys or fields in the JSON objects that are not specified in the task (e.g., avoid adding extra fields like "Notes" or "Description" unless explicitly instructed).
+
+BPMN-Specific Negative Prompts:
+- Gateway Split and Join: DO NOT allow a gateway to have multiple incoming flows with multiple outgoing flows simultaneously. Ensure that a gateway either splits (one incoming flow with multiple outgoing flows) or joins (multiple incoming flows with one outgoing flow) but not both at the same time.
+- Prevent Single Flow Gateways: DO NOT allow gateways to have a single incoming flow and a single outgoing flow. Gateways must represent decision points or parallel processing and should always have multiple outgoing or incoming flows.
+- Nodes Connection: DO NOT allow any nodes (activities, events, or gateways) to be unconnected. Every node must be connected to at least one other node via a sequence flow, ensuring continuity in the process flow.
+- Dangling Sequence Flows: DO NOT create sequence flows that do not have a proper start or end point. All sequence flows must begin and end at defined nodes, ensuring a logical and continuous path through the process.
+- Avoid Cyclic Loops (unless specified): DO NOT create cyclic loops unless explicitly indicated in the textual description and in the given JSON key of "Loops". Loops should be clearly defined and intentional, not a result of misinterpreted sequence flows.
+- Misalignment of Events and Activities: DO NOT allow sequence flows that improperly align events and activities, such as flows that incorrectly connect a start event directly to an activity or skip necessary steps in the process.
+- Inconsistent Use of Parallel and Conditional Flows: DO NOT mix parallel (AND) and conditional (XOR/OR) flows inappropriately. Ensure that the correct gateway type is used and that the flow logic is consistent and accurate.
 
 
 Examples:
@@ -44,13 +67,15 @@ The employee onboarding process begins when a new hire submits their completed p
             {"E_AttendOrientation": "After attending the orientation"},
             {"A_AssignToDepartment": "the new hire is assigned to their department"}
         ],
-        "total_gateways": 2,
-        "total_XOR_split": 1,
-        "total_XOR_join": 1,
-        "total_AND_split": 0,
-        "total_AND_join": 0,
-        "total_OR_split": 0,
-        "total_OR_join": 0,
+        "ActionFlows": [
+            {"from": "Start_SubmitPaperwork", "to": "A_ReviewDocuments"},
+            {"from": "A_ReviewDocuments", "to": "A_ReturnForCorrection"},
+            {"from": "A_ReturnForCorrection", "to": "A_ReviewDocuments"},
+            {"from": "A_ReviewDocuments", "to": "A_ScheduleOrientation"},
+            {"from": "A_ScheduleOrientation", "to": "E_AttendOrientation"},
+            {"from": "E_AttendOrientation", "to": "A_AssignToDepartment"},
+            {"from": "A_AssignToDepartment", "to": "End_AssignDepartment"}
+        ],
         "Gateways": [
             {
                 "id": "G1",
@@ -60,15 +85,15 @@ The employee onboarding process begins when a new hire submits their completed p
                 "conditions": [
                     {
                         "condition": "If any documents are missing or incorrect, return to new hire for correction",
-                        "to_node": "A_ReturnForCorrection"
+                        "to": "A_ReturnForCorrection"
                     },
                     {
                         "condition": "If all documents are complete and correct, schedule orientation",
-                        "to_node": "A_ScheduleOrientation"
+                        "to": "A_ScheduleOrientation"
                     }
                 ],
-                "from_node": ["A_ReviewDocuments"],
-                "to_nodes": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
+                "from": ["A_ReviewDocuments"],
+                "to": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
                 "reason": "If any documents are missing or incorrect, they are returned to the new hire for correction. Otherwise, the new hire is scheduled for orientation."
             },
             {
@@ -82,8 +107,8 @@ The employee onboarding process begins when a new hire submits their completed p
                         "to_node": "A_AssignToDepartment"
                     }
                 ],
-                "from_node": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
-                "to_nodes": ["A_AssignToDepartment"],
+                "from": ["A_ReturnForCorrection", "A_ScheduleOrientation"],
+                "to": ["A_AssignToDepartment"],
                 "reason": "After attending the orientation and completing all necessary steps, the new hire is assigned to their department."
             }
         ],
