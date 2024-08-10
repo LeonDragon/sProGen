@@ -23,6 +23,7 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", json_format="", 
             result = response.choices[0].message.content
             prompt_tokens= response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
+            result.parsed.steps
         except Exception as e:
             print(e.json()) # Handle validation errors
             pass
