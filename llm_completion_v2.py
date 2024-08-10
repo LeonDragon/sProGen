@@ -9,6 +9,7 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", json_format="", 
     # mode: gpt-4o-mini, gpt-4o, llama3.1, meta/llama3-405b-instruct-maas
     prompt_tokens = 0
     completion_tokens = 0
+    result = ""
     if api == "openai":
         try:
             client = OpenAI(api_key=OPENAI_API_KEY)
@@ -18,15 +19,14 @@ def get_completion(messages, api="openai", model="gpt-4o-mini", json_format="", 
                 temperature=float(temperature),
                 max_tokens=max_tokens,
                 response_format=json_format,
-                strict=True
+                #strict=True
             )
             result = response.choices[0].message.content
             prompt_tokens= response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
-            result.parsed.steps
         except Exception as e:
-            print(e.json()) # Handle validation errors
-            pass
+            print(e) # Handle validation errors
+            
     elif api == "ollama":
         ollama_llm = OllamaLLM(
             model=model,

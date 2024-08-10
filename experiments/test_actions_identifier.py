@@ -1,7 +1,12 @@
 
 #%%
-# STEP 3 - ACTIONS (EVENTS/ACTIVITIES) IDENTIFICATION
+# STEP 3 - TEST ACTIONS (EVENTS/ACTIVITIES) IDENTIFICATION
 import json
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from llm_completion_v2 import get_completion
 
 # Constants for system and user messages
@@ -23,7 +28,6 @@ Instructions:
 - Identify Activities/Events: Identify specific actions or tasks described in the text and event usually in verb forms, assigning a variable to each (e.g., A_RecieveOrder, A_CheckCredit, E_RecieveEmail) (note that A for activities or tasks, E for Events). List of distinct activities without any redundancy.
     - Textual Clues: These are the core actions that drive the process forward. Look for verbs or action phrases like "register", "investigate", "prepare", "review", "approve", "admit", "examine", "process", "schedule", or "conduct".
 - Identify Participants: Identify the single participant involved in each activity or event and include them in the output.
-- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
 
 
 """
@@ -222,7 +226,7 @@ if __name__ == "__main__":
         }
     ]
     """
-    result, prompt_tokens, completion_tokens = identify_from_message(text_description, api="openai", model="gpt-4o-mini",json_format=json_format(), temperature=0.0,)
+    result, prompt_tokens, completion_tokens = identify_from_message(text_description, api="openai", model="gpt-4o-mini-2024-07-18",json_format=json_format(), temperature=0.0,)
     print(result)
 
 # %%
