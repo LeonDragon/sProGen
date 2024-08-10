@@ -1,7 +1,6 @@
 
 #%%
 # STEP 3 - ACTIONS (EVENTS/ACTIVITIES) IDENTIFICATION
-import json
 from llm_completion import get_completion
 
 # Constants for system and user messages

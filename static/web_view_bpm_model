@@ -1,8 +1,8 @@
 digraph BPMN {
     rankdir=LR;
     node [shape=circle, style=filled, color=lightblue, penwidth=2];
-    Start_ShippingGoods [label="", color=forestgreen];
-    End_PrepareForPickup [label="", color=firebrick, penwidth=3];
+    Start_RegisterInquiry [label="", color=forestgreen];
+    End_ApproveResponse [label="", color=firebrick, penwidth=3];
 
     node [
         shape=box, 
@@ -12,13 +12,11 @@ digraph BPMN {
         penwidth=1, 
         fontcolor=black
     ];
-    A_BeginPackagingGoods [label="BeginPackagingGoods"];
-    A_ArrangeParcelInsurance [label="ArrangeParcelInsurance"];
-    A_ClarifyShippingMethod [label="ClarifyShippingMethod"];
-    A_InviteLogisticsCompanies [label="InviteLogisticsCompanies"];
-    A_PrepareGoodsForPickup [label="PrepareGoodsForPickup"];
-    A_WritePackageLabel [label="WritePackageLabel"];
-    A_SelectLogisticsCompany [label="SelectLogisticsCompany"];
+    A_ReprepareResponse [label="ReprepareResponse"];
+    A_ReviewResponse [label="ReviewResponse"];
+    A_PrepareResponse [label="PrepareResponse"];
+    A_InvestigateInquiry [label="InvestigateInquiry"];
+    A_RegisterInquiry [label="RegisterInquiry"];
 
     node [
         shape=diamond, 
@@ -27,17 +25,16 @@ digraph BPMN {
         color=black, 
         penwidth=1
     ];
-    XOR_ShippingComplete [label="XOR"];
-    XOR_ShippingMethod [label="XOR"];
-    Start_ShippingGoods -> A_ClarifyShippingMethod;
-    A_ClarifyShippingMethod -> XOR_ShippingMethod;
-    XOR_ShippingMethod -> A_InviteLogisticsCompanies [label="if the amount is large"];
-    XOR_ShippingMethod -> A_WritePackageLabel [label="if the amount is small"];
-    A_InviteLogisticsCompanies -> A_SelectLogisticsCompany;
-    A_SelectLogisticsCompany -> A_WritePackageLabel;
-    A_WritePackageLabel -> A_ArrangeParcelInsurance;
-    A_ArrangeParcelInsurance -> A_BeginPackagingGoods;
-    A_BeginPackagingGoods -> XOR_ShippingComplete;
-    XOR_ShippingComplete -> A_PrepareGoodsForPickup;
-    A_PrepareGoodsForPickup -> End_PrepareForPickup;
+    XOR_ReviewResponseApproval [label="XOR"];
+    XOR_ResponseFinalization [label="XOR"];
+    Start_RegisterInquiry -> A_RegisterInquiry;
+    A_RegisterInquiry -> A_InvestigateInquiry;
+    A_InvestigateInquiry -> A_PrepareResponse;
+    A_PrepareResponse -> A_ReviewResponse;
+    A_ReviewResponse -> XOR_ReviewResponseApproval;
+    XOR_ReviewResponseApproval -> A_ReprepareResponse [label="if the registrar does not approve"];
+    XOR_ReviewResponseApproval -> End_ApproveResponse [label="if the registrar approves"];
+    A_ReprepareResponse -> A_ReviewResponse;
+    A_ReviewResponse -> XOR_ResponseFinalization;
+    XOR_ResponseFinalization -> End_ApproveResponse;
 }
