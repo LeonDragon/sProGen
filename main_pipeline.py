@@ -102,10 +102,13 @@ def pipeline(process_description):
     # Step 1: Preprocessing to improve the textual description
     print("Step 1: Preprocessing to improve the textual description", end=' ', flush=True)
     #preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
-    preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="ollama", model="phi3", temperature=0.0)
-    total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
+    
+    # preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="ollama", model="phi3", temperature=0.0)
+    # total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
+    # new_process_description = json.loads(preprocess_result)[0]["Original"] #Original or Augmented
+    new_process_description = process_description
+    
     #print(preprocess_result)
-    new_process_description = json.loads(preprocess_result)[0]["Original"] #Original or Augmented
     print(" ===> DONE \n")
     print(new_process_description)
     time.sleep(delay_time) # For vertex AI Llama3.1 405b
@@ -113,7 +116,8 @@ def pipeline(process_description):
     # Step 2: Context understanding to identify context and objectives
     print("Step 2: Context understanding to identify context and objectives", end=' ', flush=True)
     #context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
-    context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="ollama", model="phi3", temperature=0.7)
+    #context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="ollama", model="phi3", temperature=0.7)
+    context_json_result, prompt_tokens, completion_tokens = context_identify_from_message(new_process_description, api="openai", model="gpt-4o-mini", temperature=0.7)
     total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     previous_json_result = context_json_result
     combined_prompt = combine_results("", context_json_result, new_process_description)

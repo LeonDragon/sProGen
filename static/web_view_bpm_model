@@ -2,7 +2,7 @@ digraph BPMN {
     rankdir=LR;
     node [shape=circle, style=filled, color=lightblue, penwidth=2];
     Start_RegisterInquiry [label="", color=forestgreen];
-    End_ApproveResponse [label="", color=firebrick, penwidth=3];
+    End_FinalizeAndApproveResponse [label="", color=firebrick, penwidth=3];
 
     node [
         shape=box, 
@@ -12,11 +12,12 @@ digraph BPMN {
         penwidth=1, 
         fontcolor=black
     ];
-    A_ReprepareResponse [label="ReprepareResponse"];
-    A_ReviewResponse [label="ReviewResponse"];
-    A_PrepareResponse [label="PrepareResponse"];
-    A_InvestigateInquiry [label="InvestigateInquiry"];
     A_RegisterInquiry [label="RegisterInquiry"];
+    A_PrepareResponse [label="PrepareResponse"];
+    A_RejectResponse [label="RejectResponse"];
+    A_InvestigateInquiry [label="InvestigateInquiry"];
+    A_ReviewResponse [label="ReviewResponse"];
+    A_ApproveResponse [label="ApproveResponse"];
 
     node [
         shape=diamond, 
@@ -25,16 +26,16 @@ digraph BPMN {
         color=black, 
         penwidth=1
     ];
-    XOR_ReviewResponseApproval [label="XOR"];
-    XOR_ResponseFinalization [label="XOR"];
+    XOR_FinalizeResponse [label="XOR"];
+    XOR_ReviewResponseDecision [label="XOR"];
     Start_RegisterInquiry -> A_RegisterInquiry;
     A_RegisterInquiry -> A_InvestigateInquiry;
     A_InvestigateInquiry -> A_PrepareResponse;
     A_PrepareResponse -> A_ReviewResponse;
-    A_ReviewResponse -> XOR_ReviewResponseApproval;
-    XOR_ReviewResponseApproval -> A_ReprepareResponse [label="if the registrar does not approve"];
-    XOR_ReviewResponseApproval -> End_ApproveResponse [label="if the registrar approves"];
-    A_ReprepareResponse -> A_ReviewResponse;
-    A_ReviewResponse -> XOR_ResponseFinalization;
-    XOR_ResponseFinalization -> End_ApproveResponse;
+    A_ReviewResponse -> XOR_ReviewResponseDecision;
+    XOR_ReviewResponseDecision -> A_ApproveResponse [label="if response meets required standards"];
+    XOR_ReviewResponseDecision -> A_RejectResponse [label="if response does not meet required standards"];
+    A_RejectResponse -> A_PrepareResponse;
+    A_ApproveResponse -> XOR_FinalizeResponse;
+    XOR_FinalizeResponse -> End_FinalizeAndApproveResponse;
 }

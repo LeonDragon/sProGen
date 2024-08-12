@@ -20,6 +20,7 @@ Instructions:
 - Determine Flow: Establish the flow between identified nodes, ensuring each transition is clear and follows the logical sequence of the business process.
 - Construct JSON Objects: For each flow, create a JSON object that includes the list of nodes in the flow, in the correct sequence.
 - Output Format: Output a Python list of JSON objects detailing the flows identified in the previous steps. Ensure the output is strictly in JSON format without any additional text.
+- DO NOT output additional text except the JSON format. Do not output ```json or ```. Do not output comment "//"
 
 Examples:
 
