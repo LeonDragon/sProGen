@@ -103,10 +103,11 @@ def pipeline(process_description):
     print("Step 1: Preprocessing to improve the textual description", end=' ', flush=True)
     #preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="vertexai", model="meta/llama3-405b-instruct-maas", temperature=0.0)
     
-    # preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="ollama", model="phi3", temperature=0.0)
+    preprocess_result, prompt_tokens, completion_tokens = preprocess_identify_from_message(process_description, api="openai", model="gpt-4o", temperature=0.7)
     # total_prompt_tokens, total_completion_tokens = update_total_tokens(prompt_tokens, completion_tokens, total_prompt_tokens, total_completion_tokens)
     # new_process_description = json.loads(preprocess_result)[0]["Original"] #Original or Augmented
-    new_process_description = process_description
+    #new_process_description = process_description
+    new_process_description = preprocess_result
     
     #print(preprocess_result)
     print(" ===> DONE \n")

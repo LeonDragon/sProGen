@@ -266,7 +266,7 @@ def identify_from_message(text, api="openai", model="gpt-4o-mini", temperature=0
     Returns:
         dict: A dictionary containing identified gateways and related metadata.
     """
-    system_message = SYSTEM_MESSAGE_TEMPLATE
+    system_message = SYSTEM_MESSAGE_TEMPLATE_NEW_8_12_2024
     user_message = construct_user_message(text)
     messages = construct_messages(system_message, user_message)
 
