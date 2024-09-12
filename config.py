@@ -1,1 +1,1 @@
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "sk-DW..."
